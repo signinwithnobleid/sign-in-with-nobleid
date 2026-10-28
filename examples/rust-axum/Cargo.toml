@@ -1,0 +1,21 @@
+[package]
+name = "nobleid-example-axum"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.88"
+license = "Apache-2.0"
+publish = false
+description = "Minimal Sign in with NobleID web app: axum + nobleid-signin."
+
+[[bin]]
+name = "nobleid-example-axum"
+path = "src/main.rs"
+
+[dependencies]
+nobleid-signin = { path = "../../packages/rust" }
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "form", "query"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
+serde_json = "1"
+base64 = "0.22"
+getrandom = "0.2"
+url = "2"

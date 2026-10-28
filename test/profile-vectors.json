@@ -1,0 +1,240 @@
+{
+  "about": "Shared cases for profileFromClaims / profile_from_claims / ProfileFromClaims in every helper (packages/*). Input: verified ID token claims and, optionally, the userinfo response. Output: the normalised profile in snake_case (each helper's own field names map onto these one to one), or an error code. See docs/profile-data.md.",
+  "cases": [
+    {
+      "name": "everything shared",
+      "id_token": {
+        "sub": "6f1c2a52-0d7e-4c55-9d4f-6f4c3b1e2a10",
+        "nobleid": "NI0P88W05R71S46",
+        "nobleid_uri": "https://www.nobleid.org/NI0P88W05R71S46",
+        "name": "Ada Lovelace",
+        "given_name": "Ada",
+        "family_name": "Lovelace",
+        "preferred_username": "ada",
+        "profile": "https://www.nobleid.org/NI0P88W05R71S46",
+        "picture": "https://cdn.example.org/ada.png",
+        "website": "https://ada.example.org",
+        "identity_verified": true,
+        "nobleid_verified_researcher": false,
+        "updated_at": 1761523200,
+        "email": "ada@uni.example.edu",
+        "email_verified": true,
+        "orcid": "https://orcid.org/0000-0002-1825-0097",
+        "orcid_verified": true,
+        "affiliation": { "name": "University of Copenhagen", "ror": "https://ror.org/035b05819" }
+      },
+      "userinfo": {
+        "sub": "6f1c2a52-0d7e-4c55-9d4f-6f4c3b1e2a10",
+        "name": "Ada Lovelace",
+        "research_interests": ["Bibliometrics", "Open science"],
+        "affiliations": [
+          { "organization": "University of Copenhagen", "role": "Associate Professor", "start_year": 2019, "ror": "https://ror.org/035b05819" },
+          { "organization": "Example Lab" }
+        ]
+      },
+      "profile": {
+        "sub": "6f1c2a52-0d7e-4c55-9d4f-6f4c3b1e2a10",
+        "nobleid": "NI0P88W05R71S46",
+        "nobleid_uri": "https://www.nobleid.org/NI0P88W05R71S46",
+        "name": "Ada Lovelace",
+        "given_name": "Ada",
+        "family_name": "Lovelace",
+        "username": "ada",
+        "picture": "https://cdn.example.org/ada.png",
+        "website": "https://ada.example.org",
+        "profile_url": "https://www.nobleid.org/NI0P88W05R71S46",
+        "research_interests": ["Bibliometrics", "Open science"],
+        "email": "ada@uni.example.edu",
+        "email_verified": true,
+        "orcid": "https://orcid.org/0000-0002-1825-0097",
+        "affiliation": { "name": "University of Copenhagen", "ror": "https://ror.org/035b05819" },
+        "affiliations": [
+          { "organization": "University of Copenhagen", "role": "Associate Professor", "start_year": 2019, "ror": "https://ror.org/035b05819" },
+          { "organization": "Example Lab", "role": null, "start_year": null, "ror": null }
+        ],
+        "identity_verified": true,
+        "verified_researcher": false,
+        "updated_at": 1761523200
+      }
+    },
+    {
+      "name": "ID token only, openid and profile",
+      "id_token": {
+        "sub": "u-2",
+        "nobleid": "NI0P00W00A77T01",
+        "nobleid_uri": "https://www.nobleid.org/NI0P00W00A77T01",
+        "name": "Grace Hopper",
+        "preferred_username": "grace",
+        "identity_verified": false,
+        "nobleid_verified_researcher": false
+      },
+      "profile": {
+        "sub": "u-2",
+        "nobleid": "NI0P00W00A77T01",
+        "nobleid_uri": "https://www.nobleid.org/NI0P00W00A77T01",
+        "name": "Grace Hopper",
+        "given_name": null,
+        "family_name": null,
+        "username": "grace",
+        "picture": null,
+        "website": null,
+        "profile_url": null,
+        "research_interests": [],
+        "email": null,
+        "email_verified": false,
+        "orcid": null,
+        "affiliation": null,
+        "affiliations": [],
+        "identity_verified": false,
+        "verified_researcher": false,
+        "updated_at": null
+      }
+    },
+    {
+      "name": "userinfo is fresher and wins; sub stays the ID token's",
+      "id_token": { "sub": "u-3", "name": "Old Name", "website": "https://old.example.org" },
+      "userinfo": { "sub": "u-3", "name": "New Name" },
+      "profile": {
+        "sub": "u-3",
+        "nobleid": null,
+        "nobleid_uri": null,
+        "name": "New Name",
+        "given_name": null,
+        "family_name": null,
+        "username": null,
+        "picture": null,
+        "website": "https://old.example.org",
+        "profile_url": null,
+        "research_interests": [],
+        "email": null,
+        "email_verified": false,
+        "orcid": null,
+        "affiliation": null,
+        "affiliations": [],
+        "identity_verified": false,
+        "verified_researcher": false,
+        "updated_at": null
+      }
+    },
+    {
+      "name": "an ORCID iD counts only when proven and well formed; an unconfirmed email is not verified",
+      "id_token": {
+        "sub": "u-4",
+        "orcid": "https://orcid.org/0000-0002-1825-0097",
+        "email": "someone@example.org"
+      },
+      "userinfo": { "sub": "u-4", "orcid": "0000-0002-1825-0097", "orcid_verified": true, "email_verified": "true" },
+      "profile": {
+        "sub": "u-4",
+        "nobleid": null,
+        "nobleid_uri": null,
+        "name": null,
+        "given_name": null,
+        "family_name": null,
+        "username": null,
+        "picture": null,
+        "website": null,
+        "profile_url": null,
+        "research_interests": [],
+        "email": "someone@example.org",
+        "email_verified": false,
+        "orcid": null,
+        "affiliation": null,
+        "affiliations": [],
+        "identity_verified": false,
+        "verified_researcher": false,
+        "updated_at": null
+      }
+    },
+    {
+      "name": "unsafe or malformed values are dropped, not passed on",
+      "id_token": {
+        "sub": "u-5",
+        "name": "   ",
+        "given_name": 42,
+        "picture": "http://cdn.example.org/a.png",
+        "website": "javascript:alert(1)",
+        "profile": "ftp://www.nobleid.org/x",
+        "identity_verified": "yes",
+        "updated_at": "1761523200",
+        "affiliation": { "name": "  ", "ror": "https://ror.org/035b05819" }
+      },
+      "userinfo": {
+        "sub": "u-5",
+        "research_interests": "Bibliometrics",
+        "affiliations": { "organization": "Not a list" }
+      },
+      "profile": {
+        "sub": "u-5",
+        "nobleid": null,
+        "nobleid_uri": null,
+        "name": null,
+        "given_name": null,
+        "family_name": null,
+        "username": null,
+        "picture": null,
+        "website": null,
+        "profile_url": null,
+        "research_interests": [],
+        "email": null,
+        "email_verified": false,
+        "orcid": null,
+        "affiliation": null,
+        "affiliations": [],
+        "identity_verified": false,
+        "verified_researcher": false,
+        "updated_at": null
+      }
+    },
+    {
+      "name": "older servers: nulls, a string start_year, blank and duplicate entries",
+      "id_token": { "sub": "u-6", "website": "  http://ada.example.org/me  " },
+      "userinfo": {
+        "sub": "u-6",
+        "research_interests": [" Open science", "open science ", "", "Bibliometrics", 7],
+        "affiliation": { "name": " Example University ", "ror": "035b05819" },
+        "affiliations": [
+          { "organization": "Example University", "role": null, "start_year": "2019" },
+          { "organization": " ", "role": "PI" },
+          { "organization": "Second Lab", "role": " ", "start_year": "c. 2019", "ror": "https://ror.org/not-a-ror" },
+          "junk"
+        ]
+      },
+      "profile": {
+        "sub": "u-6",
+        "nobleid": null,
+        "nobleid_uri": null,
+        "name": null,
+        "given_name": null,
+        "family_name": null,
+        "username": null,
+        "picture": null,
+        "website": "http://ada.example.org/me",
+        "profile_url": null,
+        "research_interests": ["Open science", "Bibliometrics"],
+        "email": null,
+        "email_verified": false,
+        "orcid": null,
+        "affiliation": { "name": "Example University", "ror": null },
+        "affiliations": [
+          { "organization": "Example University", "role": null, "start_year": 2019, "ror": null },
+          { "organization": "Second Lab", "role": null, "start_year": null, "ror": null }
+        ],
+        "identity_verified": false,
+        "verified_researcher": false,
+        "updated_at": null
+      }
+    },
+    {
+      "name": "userinfo for another person",
+      "id_token": { "sub": "u-7" },
+      "userinfo": { "sub": "someone-else", "name": "Mallory" },
+      "error": "invalid_token"
+    },
+    {
+      "name": "no sub in the ID token",
+      "id_token": { "name": "Nobody" },
+      "error": "invalid_token"
+    }
+  ]
+}

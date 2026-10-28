@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Works</h1>
+{% if works %}<pre id="works">{{ works }}</pre>{% else %}<p>The works scope was not granted.</p>{% endif %}
+<p><a href="/">Back</a></p>
+{% endblock %}

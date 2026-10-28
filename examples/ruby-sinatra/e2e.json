@@ -1,0 +1,10 @@
+{
+  "lang": "ruby",
+  "requires": ["ruby", "bundle"],
+  "setup": ["bundle install"],
+  "start": ["bundle", "exec", "puma", "--bind", "tcp://localhost:{PORT}", "--environment", "production", "config.ru"],
+  "callbackPath": "/auth/nobleid/callback",
+  "client": "confidential",
+  "readyTimeout": 60,
+  "env": { "BUNDLE_FROZEN": "true", "APP_ENV": "production" }
+}

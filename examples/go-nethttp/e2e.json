@@ -1,0 +1,9 @@
+{
+  "lang": "go",
+  "requires": ["go"],
+  "setup": ["go build -o {ROOT}/test/.build/go/go-nethttp ."],
+  "start": ["{ROOT}/test/.build/go/go-nethttp"],
+  "callbackPath": "/callback",
+  "client": "confidential",
+  "readyTimeout": 30
+}

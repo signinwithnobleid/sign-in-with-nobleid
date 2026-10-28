@@ -1,0 +1,36 @@
+# Navigation for a static-site generator (MkDocs). Not built in this repository.
+site_name: Sign in with NobleID
+docs_dir: docs
+nav:
+  - Overview: index.md
+  - Register an app: register.md
+  - Quickstarts:
+      - All languages: quickstart/index.md
+      - JavaScript / TypeScript: quickstart/javascript.md
+      - Python: quickstart/python.md
+      - Rust: quickstart/rust.md
+      - Go: quickstart/go.md
+      - PHP: quickstart/php.md
+      - Java (Spring Boot): quickstart/java.md
+      - Ruby: quickstart/ruby.md
+      - .NET: quickstart/dotnet.md
+  - Platform integrations:
+      - Overview: integrations/README.md
+      - Open Journal Systems: integrations/ojs.md
+      - WordPress: integrations/wordpress.md
+      - DSpace: integrations/dspace.md
+      - Dataverse: integrations/dataverse.md
+      - JupyterHub: integrations/jupyterhub.md
+      - Discourse: integrations/discourse.md
+      - Moodle: integrations/moodle.md
+      - Keycloak: integrations/keycloak.md
+  - Scopes and claims: scopes-and-claims.md
+  - Fill your app's profile: profile-data.md
+  - Tokens: tokens.md
+  - Errors: errors.md
+  - Logout: logout.md
+  - Security for integrators: security.md
+  - Troubleshooting: troubleshooting.md
+  - Brand and button guide: brand.md
+  - FAQ: faq.md
+  - Roadmap: roadmap.md

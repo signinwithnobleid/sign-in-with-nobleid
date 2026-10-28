@@ -1,0 +1,9 @@
+{
+  "lang": "javascript",
+  "requires": ["node", "npm"],
+  "setup": ["cd {ROOT} && npm ci --no-audit --no-fund"],
+  "start": ["node", "server.mjs"],
+  "callbackPath": "/callback",
+  "client": "confidential",
+  "readyTimeout": 30
+}

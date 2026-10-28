@@ -1,0 +1,10 @@
+{
+  "name": "example-node-openid-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": { "start": "node server.mjs" },
+  "engines": { "node": ">=22" },
+  "dependencies": { "nobleid-signin": "file:../../packages/node" }
+}

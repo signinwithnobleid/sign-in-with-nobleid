@@ -1,0 +1,10 @@
+{
+  "name": "nobleid-mock-oidc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local mock of the Sign in with NobleID provider, for development and tests.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": { "nobleid-mock-oidc": "server.mjs" },
+  "engines": { "node": ">=22" }
+}

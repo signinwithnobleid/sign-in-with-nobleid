@@ -1,0 +1,37 @@
+# Every value comes from the environment; see .env.example.
+spring:
+  main:
+    banner-mode: off
+  security:
+    oauth2:
+      client:
+        registration:
+          nobleid:
+            provider: nobleid
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            client-name: NobleID
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            redirect-uri: ${REDIRECT_URI:http://localhost:8080/login/oauth2/code/nobleid}
+            scope: openid,profile,email,orcid,affiliations,works,offline_access
+        provider:
+          nobleid:
+            # Endpoints come from {issuer}/.well-known/openid-configuration at startup.
+            issuer-uri: ${ISSUER:https://id.nobleid.org}
+            user-name-attribute: sub
+
+server:
+  port: ${PORT:8080}
+  address: ${BIND_ADDRESS:127.0.0.1} # this machine only; put a reverse proxy in front in production
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        # "secure" is set from the scheme of REDIRECT_URI in NobleIdExampleApplication.
+
+logging:
+  level:
+    root: WARN
+    com.example.nobleid: INFO

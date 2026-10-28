@@ -1,0 +1,30 @@
+{
+  "name": "nobleid-example-nextjs-authjs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sign in with NobleID: Next.js App Router + Auth.js v5",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "next dev -H localhost",
+    "build": "next build",
+    "start": "next start -H localhost"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "jose": "6.2.12",
+    "next": "16.4.2",
+    "next-auth": "5.0.0-beta.32",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "overrides": {
+    "postcss": "8.5.31"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.18",
+    "typescript": "5.9.3"
+  }
+}

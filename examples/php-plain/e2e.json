@@ -1,0 +1,9 @@
+{
+  "lang": "php",
+  "requires": ["php"],
+  "setup": ["composer install --no-dev --no-interaction --no-progress --prefer-dist"],
+  "start": ["php", "-S", "localhost:{PORT}", "-t", "public", "public/index.php"],
+  "callbackPath": "/callback",
+  "client": "confidential",
+  "readyTimeout": 30
+}

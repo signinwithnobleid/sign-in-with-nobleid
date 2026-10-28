@@ -1,0 +1,11 @@
+# cargo-audit settings for this crate.
+[advisories]
+# RUSTSEC-2023-0071 (rsa, Marvin timing attack) affects RSA decryption and
+# signing. rsa comes in through openidconnect and is only ever used to verify
+# public-key signatures, and NobleID signs with ES256, so the code is unreachable.
+# RUSTSEC-2026-0387 (crypto-bigint < 0.7.6, non-constant-time arithmetic) leaks
+# only values that are secret. crypto-bigint 0.5 comes in through p256/p384
+# (openidconnect), which this crate uses only to verify ES256 signatures:
+# the key, the signature and the message are all public. No 0.13 release of
+# p256 moves to crypto-bigint 0.7.
+ignore = ["RUSTSEC-2023-0071", "RUSTSEC-2026-0387"]

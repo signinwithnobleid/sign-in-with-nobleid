@@ -1,0 +1,16 @@
+{
+  "lang": "typescript",
+  "requires": ["node", "npm"],
+  "setup": ["npm ci --no-audit --no-fund", "npx next build"],
+  "start": ["npx", "next", "start", "-H", "localhost", "-p", "{PORT}"],
+  "callbackPath": "/api/auth/callback/nobleid",
+  "client": "confidential",
+  "readyTimeout": 90,
+  "env": {
+    "AUTH_SECRET": "test-only-not-secret-e2e-0123456789abcdefghijklmnop",
+    "AUTH_URL": "{APP_URL}",
+    "AUTH_TRUST_HOST": "true",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "profile": { "loginMethod": "authjs" }
+}

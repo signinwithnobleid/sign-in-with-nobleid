@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block body %}
+{% if not s %}
+<h1>NobleID example (Flask)</h1>
+<p id="signed-out">You are signed out.</p>
+<p><a href="/login">Sign in with NobleID</a></p>
+{% else %}
+<h1>Signed in</h1>
+<p>Hello, {{ s.user.name or s.user.nobleid }}.</p>
+<pre id="claims">{{ claims }}</pre>
+<p>
+  <a href="/works">My works</a>
+  {% if s.tokens.refresh_token %}
+  <form method="post" action="/refresh" style="display:inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Refresh tokens</button></form>
+  {% endif %}
+  <form method="post" action="/logout" style="display:inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Sign out</button></form>
+</p>
+{% endif %}
+{% endblock %}

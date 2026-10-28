@@ -1,0 +1,26 @@
+{
+    "name": "nobleid/example-php-plain",
+    "description": "Sign in with NobleID: a plain PHP example for the built-in web server.",
+    "type": "project",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=8.3",
+        "nobleid/signin": "^1.0"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../packages/php",
+            "options": {
+                "symlink": true,
+                "versions": { "nobleid/signin": "1.0.0" }
+            }
+        }
+    ],
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

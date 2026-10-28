@@ -1,0 +1,10 @@
+{
+  "lang": "csharp",
+  "requires": ["dotnet"],
+  "setup": ["dotnet build NobleIdExample.csproj -c Release -o {ROOT}/test/.build/dotnet"],
+  "start": ["dotnet", "{ROOT}/test/.build/dotnet/NobleIdExample.dll"],
+  "callbackPath": "/signin-oidc",
+  "client": "confidential",
+  "readyTimeout": 120,
+  "env": { "DATA_PROTECTION_KEYS_DIR": "{ROOT}/test/.build/dotnet-keys" }
+}

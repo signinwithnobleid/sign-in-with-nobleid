@@ -1,0 +1,13 @@
+{
+  "name": "nobleid-signin",
+  "version": "1.0.0",
+  "description": "Server-side helper for Sign in with NobleID, built on openid-client.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "index.mjs",
+  "types": "index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "default": "./index.mjs" } },
+  "files": ["index.mjs", "index.d.ts", "README.md", "LICENSE", "NOTICE"],
+  "engines": { "node": ">=22" },
+  "dependencies": { "openid-client": "6.8.8" }
+}

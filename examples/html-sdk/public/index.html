@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sign in with NobleID (browser-only example)</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>Browser-only example</h1>
+    <p>A public client: no secret, PKCE, tokens kept in memory only. If your app has a server, sign in there instead (see the other examples).</p>
+    <div id="signin"></div>
+    <p id="status" role="status"></p>
+  </main>
+  <!-- Production: <script src="https://www.nobleid.org/sdk/nobleid-auth.js"></script>
+       (or self-host a reviewed copy). This example serves the copy in ../../sdk. -->
+  <script src="/sdk/nobleid-auth.js"></script>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

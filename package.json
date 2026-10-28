@@ -1,0 +1,16 @@
+{
+  "name": "sign-in-with-nobleid",
+  "private": true,
+  "description": "Client kit for Sign in with NobleID (OpenID Connect): SDK, helpers, examples, local mock provider.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "workspaces": ["mock-oidc", "packages/node", "examples/node-openid-client", "examples/html-sdk"],
+  "scripts": {
+    "test": "node test/run-all.mjs",
+    "test:mock": "node --test test/mock.test.mjs",
+    "test:sdk": "node --test test/sdk.test.mjs",
+    "test:profile": "node --test test/profile.test.mjs",
+    "test:examples": "node test/run-example.mjs --all"
+  }
+}

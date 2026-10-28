@@ -1,0 +1,17 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "sinatra", "4.2.1"
+gem "rack", "3.2.7"
+gem "rack-session", "2.1.2"
+gem "rack-protection", "4.2.1"
+gem "rackup", "2.3.1"
+gem "puma", "8.0.2"
+
+gem "omniauth", "2.1.4"
+gem "omniauth_openid_connect", "0.8.0"
+# What omniauth_openid_connect uses underneath; pinned so ES256 + JWKS behaviour is known.
+gem "openid_connect", "2.5.0"
+gem "json-jwt", "1.17.2"
+gem "rack-oauth2", "2.3.0"

@@ -1,0 +1,9 @@
+{
+  "lang": "rust",
+  "requires": ["cargo"],
+  "setup": ["cargo build --release --locked --target-dir \"${CARGO_TARGET_DIR:-{ROOT}/test/.build/rust}\""],
+  "start": ["sh", "-c", "exec \"${CARGO_TARGET_DIR:-{ROOT}/test/.build/rust}/release/nobleid-example-axum\""],
+  "callbackPath": "/callback",
+  "client": "confidential",
+  "readyTimeout": 120
+}

@@ -1,0 +1,10 @@
+<Project>
+  <!--
+    Inside the kit, keep obj/ and bin/ out of the source tree (under the
+    git-ignored test/.build/). Copied elsewhere, the usual obj/ and bin/ apply.
+  -->
+  <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)../../mock-oidc/server.mjs')">
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../../test/.build/dotnet-obj/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)../../test/.build/dotnet-bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

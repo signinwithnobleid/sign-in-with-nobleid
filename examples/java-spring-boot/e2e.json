@@ -1,0 +1,9 @@
+{
+  "lang": "java",
+  "requires": ["java", "mvn"],
+  "setup": ["mvn -q -B -DskipTests -Dnobleid.buildDir={ROOT}/test/.build/java-spring-boot package"],
+  "start": ["java", "-jar", "{ROOT}/test/.build/java-spring-boot/nobleid-spring-boot-example.jar"],
+  "callbackPath": "/login/oauth2/code/nobleid",
+  "client": "confidential",
+  "readyTimeout": 180
+}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Signing in with NobleID</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>NobleID</h1>
+    <p id="status" role="status">Signing you in…</p>
+    <div id="badge"></div>
+    <pre id="claims" hidden></pre>
+    <p><button id="signout" type="button" hidden>Sign out</button> <a href="/">Home</a></p>
+  </main>
+  <script src="/sdk/nobleid-auth.js"></script>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

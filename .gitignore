@@ -1,0 +1,38 @@
+# dependencies and build output
+node_modules/
+.next/
+out/
+target/
+bin/
+obj/
+vendor/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.gradle/
+build/
+dist/
+.bundle/
+
+# test output
+test/.build/
+test/.logs/
+test/.bin/
+
+# local configuration and secrets (examples ship .env.example only)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

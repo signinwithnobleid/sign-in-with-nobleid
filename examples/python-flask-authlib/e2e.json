@@ -1,0 +1,21 @@
+{
+  "lang": "python",
+  "requires": [
+    "python3"
+  ],
+  "setup": [
+    "PY=\"${PYTHON:-}\"; if [ -z \"$PY\" ]; then python3 -m venv {ROOT}/test/.build/py-venv && PY={ROOT}/test/.build/py-venv/bin/python; fi; \"$PY\" -m pip install -q -r requirements.txt"
+  ],
+  "start": [
+    "sh",
+    "-c",
+    "exec \"${PYTHON:-{ROOT}/test/.build/py-venv/bin/python}\" app.py"
+  ],
+  "callbackPath": "/callback",
+  "client": "confidential",
+  "readyTimeout": 30,
+  "env": {
+    "PYTHONPATH": "{ROOT}/packages/python/src",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

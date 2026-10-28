@@ -1,0 +1,27 @@
+{
+  "_comment": "Test clients for the local mock only. These identifiers are fake and work nowhere else.",
+  "clients": [
+    {
+      "client_id": "nbcl_mockconfidential00000000",
+      "client_secret": "nbcs_mock-secret-not-real",
+      "type": "confidential",
+      "redirect_uris": [
+        "http://localhost/callback",
+        "http://localhost/api/auth/callback/nobleid",
+        "http://localhost/login/oauth2/code/nobleid",
+        "http://localhost/signin-oidc",
+        "http://localhost/auth/nobleid/callback",
+        "http://localhost/wp-admin/admin-ajax.php?action=openid-connect-authorize"
+      ]
+    },
+    {
+      "client_id": "nbcl_mockpublic00000000000000",
+      "type": "public",
+      "redirect_uris": [
+        "http://localhost/callback.html",
+        "http://localhost/callback",
+        "com.example.app:/callback"
+      ]
+    }
+  ]
+}

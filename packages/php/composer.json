@@ -1,0 +1,35 @@
+{
+    "name": "nobleid/signin",
+    "description": "Server-side helper for Sign in with NobleID (OpenID Connect), built on league/oauth2-client and firebase/php-jwt.",
+    "type": "library",
+    "license": "Apache-2.0",
+    "keywords": [
+        "nobleid",
+        "openid-connect",
+        "oidc",
+        "oauth2",
+        "sign-in",
+        "orcid",
+        "researcher"
+    ],
+    "homepage": "https://www.nobleid.org",
+    "require": {
+        "php": ">=8.3",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "league/oauth2-client": "^2.9.1",
+        "firebase/php-jwt": "^7.2.1",
+        "guzzlehttp/guzzle": "^7.15.5 || ^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "NobleId\\SignIn\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
