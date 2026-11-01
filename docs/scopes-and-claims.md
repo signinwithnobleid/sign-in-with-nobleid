@@ -14,6 +14,7 @@ response can be narrower than what you asked for. Always read it.
 | `affiliations` | Self-described affiliations | `affiliation` (the primary one) | ID token, userinfo |
 | | | `affiliations` (all of them) | userinfo only |
 | `works` | The works the person registered on NobleID (titles, ARK identifiers, DOIs, dates) and how many NobleID confirmed them as an author of | `works_count`, `works_endpoint`, `verified_authorship_count` | userinfo only |
+| `roles` | The reviewer, editor and copy-editor roles on the person's public profile, their availability for each, and their expertise. Never anything private | `roles`, `availability`, `expertise` | ID token, userinfo |
 | `offline_access` | Keep access while the person is away | a refresh token | token response |
 
 `offline_access` is not pre-ticked. You get a refresh token only if you asked
@@ -36,7 +37,7 @@ for it **and** the person left it ticked.
 | `nobleid_verified_researcher` | boolean | A badge granted by NobleID staff. |
 | `updated_at` | number | Unix seconds of the last profile change. |
 | `profile_complete` | boolean | The person's NobleID profile is complete. See [complete profiles](#complete-profiles). |
-| `verification_level` | string | One of `"profile"`, `"orcid"`, `"authorship"`, in increasing order: a complete profile; plus an ORCID iD proven through ORCID's own sign-in; plus at least one authorship NobleID confirmed. `"incomplete"` can appear only in an ID token issued on refresh. **Not an identity check**: use `identity_verified` for that. Compare by the order above, and do not assume no other value will ever appear. |
+| `verification_level` | string | `"incomplete"` until the profile is complete, then one of `"profile"`, `"orcid"`, `"authorship"`, in increasing order: a complete profile; plus an ORCID iD proven through ORCID's own sign-in; plus at least one authorship NobleID confirmed. A sign-in can carry `"incomplete"` (see [complete profiles](#complete-profiles)). **Not an identity check**: use `identity_verified` for that. Compare by the order above, and do not assume no other value will ever appear. |
 | `email` | string | The person's email address. |
 | `email_verified` | boolean | `true` only if the address was confirmed: through a confirmation link, or because a sign-in provider vouched for that same address. |
 | `orcid` | string | Full URI, `https://orcid.org/0000-0000-0000-0000`. Present only when connected through ORCID's own sign-in. |
@@ -46,6 +47,9 @@ for it **and** the person left it ticked.
 | `works_count` | number | Works the person registered on NobleID. |
 | `works_endpoint` | string | URL of the works list (below). |
 | `verified_authorship_count` | number | Works where NobleID confirmed this person is an author. Only confirmed authorships count. |
+| `roles` | string[] | Roles on the person's public profile: `"reviewer"`, `"editor"`, `"copy_editor"`. `[]` when they show none, so "no roles" is told apart from "scope not granted". |
+| `availability` | object | Keyed by role: `{ "status": "available" \| "limited" \| "not_available", "until"?: "YYYY-MM-DD" }`. |
+| `expertise` | object | `{ "subjects": [{ "id", "label" }], "languages": string[], "work_types": string[], "turnaround_days"?: number }`. A subject `id` is an `https://openalex.org/…` URI. **Self-described, not verified.** |
 | `amr` | string[] | ID token from sign-in only. How the person authenticated, e.g. `["pwd"]`, `["pwd","otp","mfa"]`. Contains `"otp"` when a second factor was used. Omitted when unknown. |
 | `auth_time` | number | ID token from sign-in only. When the person last authenticated. |
 
@@ -109,13 +113,16 @@ ARK identifiers use NAAN `48914`. `doi` and dates may be `null`.
 
 ## Complete profiles
 
-NobleID signs a person in to an app only when their NobleID profile is
-complete and nothing holds the account back. If it is not, NobleID asks them
-to complete it before it returns them to your app; your app sees nothing
-until then. With `prompt=none` you get `error=interaction_required` instead.
+Signing in to an app with NobleID needs only a real name on the account
+(and nothing holding the account back). If the name is missing, NobleID asks
+the person to add it before it returns them to your app; your app sees
+nothing until then. With `prompt=none` you get `error=interaction_required`
+instead.
 
-A sign-in therefore always carries `profile_complete: true` (with the
-`profile` scope). An ID token issued later, on refresh, reports the profile
-as it is then.
+The rest of the profile (affiliation, country, research fields, a short bio
+and proof of research) is recommended, never required. So a sign-in can carry
+`profile_complete: false` and `verification_level: "incomplete"`: read them,
+and do not treat a sign-in as a complete or verified profile. An ID token
+issued later, on refresh, reports the profile as it is then.
 
 See also the [roadmap](roadmap.md).
