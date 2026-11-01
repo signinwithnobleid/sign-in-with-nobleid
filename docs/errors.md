@@ -37,7 +37,7 @@ for this sign-in: treat it as a forged response, not as the error it claims.
 | `access_denied` | The person declined. | Show a calm message and a way to try again. |
 | `login_required` | `prompt=none` and the person is not signed in to NobleID. | Retry without `prompt=none`. |
 | `consent_required` | `prompt=none` and a consent screen is needed. | Retry without `prompt=none`. |
-| `interaction_required` | `prompt=none` and the person must first complete their NobleID profile. | Retry without `prompt=none`; NobleID asks them to complete it. |
+| `interaction_required` | `prompt=none` and the person must first add something to their NobleID account (a real name). | Retry without `prompt=none`; NobleID asks them for it. |
 | `invalid_scope` | Unknown scope, a scope your app is not registered for, or `openid` missing. | Fix the request. |
 | `invalid_request` | Malformed request: PKCE missing for a public client, `plain` PKCE, unsupported `response_mode`, `prompt=none` combined with `login` or `consent`, bad `max_age`. | Fix the request. Send each parameter once (if one is repeated, only the first is used). |
 | `request_not_supported` | A `request` object was sent. | Send plain parameters, or use PAR. |
