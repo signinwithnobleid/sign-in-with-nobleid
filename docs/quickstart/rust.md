@@ -1,7 +1,8 @@
 # Rust
 
 Helper: [`packages/rust`](../../packages/rust/README.md) (crate
-`nobleid-signin`, not yet on crates.io: use a path or git dependency), over
+`nobleid-signin = "0.1"`; until 0.1.0 appears on crates.io, use a path or git
+dependency), over
 `openidconnect` 4.0.1 with `reqwest` + rustls. Example:
 [`examples/rust-axum`](../../examples/rust-axum/README.md) (axum 0.8).
 

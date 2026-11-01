@@ -109,7 +109,7 @@ final class NobleIdClient
             'connect_timeout' => 5,
             'allow_redirects' => false,
             'http_errors' => false,
-            'headers' => ['User-Agent' => 'nobleid-signin-php/1.0'],
+            'headers' => ['User-Agent' => 'nobleid-signin-php/0.1'],
         ]);
         if (!$http instanceof ClientInterface) {
             throw new NobleIdException('invalid_request', 'httpClient must implement GuzzleHttp\ClientInterface');

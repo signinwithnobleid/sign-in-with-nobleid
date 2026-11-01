@@ -90,6 +90,13 @@ runs the mock's conformance tests, the SDK tests, and every example whose
 toolchain is installed (others are reported as skipped). CI runs every
 language. Details: [test/README.md](test/README.md).
 
+## Releases
+
+See [CHANGELOG.md](CHANGELOG.md). The Node, Python and Rust helpers are
+published to npm, PyPI and crates.io as `nobleid-signin` by
+[`publish.yml`](.github/workflows/publish.yml) through each registry's
+trusted publishing; see [RELEASING.md](RELEASING.md).
+
 ## Security
 
 Read [docs/security.md](docs/security.md) before going live. Report

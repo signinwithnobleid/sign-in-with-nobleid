@@ -35,6 +35,32 @@ jobs:
       - run: node --test test/mock.test.mjs test/sdk.test.mjs test/html-sdk.test.mjs test/wordpress.test.mjs test/profile.test.mjs
       - run: node test/run-example.mjs node-openid-client
 
+  # What the publish workflow uploads, built the same way on every push: one
+  # version everywhere, the npm file list, PyPI metadata (twine check) and a
+  # crate that builds from its own .crate file.
+  packages:
+    name: packages (versions, npm pack, Python build, cargo package)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22 }
+      - run: node test/check-versions.mjs
+      - run: npm pack --dry-run
+        working-directory: packages/node
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with: { python-version: "3.12" }
+      - name: Python sdist and wheel
+        run: |
+          python -m venv "$RUNNER_TEMP/build"
+          "$RUNNER_TEMP/build/bin/python" -m pip install --quiet build==1.6.1 twine==7.0.0
+          "$RUNNER_TEMP/build/bin/python" -m build packages/python --outdir "$RUNNER_TEMP/dist"
+          "$RUNNER_TEMP/build/bin/python" -m twine check --strict "$RUNNER_TEMP"/dist/*
+      - run: rustup toolchain install 1.99.1 --profile minimal && rustup default 1.99.1
+      - run: cargo package --locked --manifest-path packages/rust/Cargo.toml --target-dir test/.build/rust-package
+
   nextjs:
     runs-on: ubuntu-latest
     timeout-minutes: 20

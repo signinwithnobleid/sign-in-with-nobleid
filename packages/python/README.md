@@ -3,9 +3,20 @@
 Helper for Sign in with NobleID on top of [Authlib](https://authlib.org/)'s
 Flask client. Python 3.11+.
 
-Not yet published to a registry. Install it from a checkout of this
-repository, by path: `pip install ./packages/python` (plus `Flask`). Do not
-install a package of this name from PyPI; it is not ours.
+## Install
+
+Releases go to PyPI as `nobleid-signin`, published by this repository's
+release workflow through PyPI trusted publishing:
+
+```sh
+pip install "nobleid-signin[flask]"
+```
+
+Only a project whose PyPI page links back to
+[github.com/signinwithnobleid/sign-in-with-nobleid](https://github.com/signinwithnobleid/sign-in-with-nobleid) is ours. Until 0.1.0 appears on PyPI, install it
+from a checkout of this repository, by path: `pip install "./packages/python[flask]"`.
+
+## Use
 
 ```python
 from flask import Flask, session

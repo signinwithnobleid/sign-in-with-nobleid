@@ -11,6 +11,7 @@ NobleID credentials are used or needed, anywhere.
 | `node test/run-example.mjs <name>` | one server example, end to end |
 | `node test/run-example.mjs --all` | every server example |
 | `node test/wordpress.test.mjs` | the WordPress plugin's exact request shape |
+| `node test/check-versions.mjs [vX.Y.Z]` | the npm, PyPI and crates.io packages share one version (and match a release tag) |
 
 Examples whose toolchain is missing are reported as `SKIPPED`, never as passed.
 

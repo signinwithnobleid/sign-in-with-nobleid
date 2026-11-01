@@ -1,0 +1,135 @@
+# Publishes the helper packages when a GitHub release is published:
+#   packages/node   -> npm       nobleid-signin
+#   packages/python -> PyPI      nobleid-signin
+#   packages/rust   -> crates.io nobleid-signin
+#
+# Every registry uses trusted publishing: the registry accepts an OpenID
+# Connect token that GitHub issues to this workflow, for this repository.
+# There is no registry token or password in this repository.
+#
+# Each registry job runs only when its repository variable is "true"
+# (Settings -> Secrets and variables -> Actions -> Variables):
+#   PUBLISH_NPM, PUBLISH_PYPI, PUBLISH_CRATES
+# Set one only after that registry trusts this workflow (see RELEASING.md).
+# A release published before then uploads nothing; publish it afterwards with
+# Actions -> publish -> Run workflow, giving the tag.
+#
+# Actions are pinned to full commit SHAs (the tag is in the comment).
+name: publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish, e.g. v0.1.0
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  build:
+    name: check versions and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22 }
+      - name: every package carries the tag's version
+        run: node test/check-versions.mjs "$TAG"
+      - name: npm package contents
+        working-directory: packages/node
+        run: npm pack --dry-run
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with: { python-version: "3.12" }
+      - name: build the Python distributions
+        run: |
+          python -m pip install --quiet build==1.6.1 twine==7.0.0
+          python -m build packages/python --outdir dist/python
+          python -m twine check --strict dist/python/*
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: python-dist
+          path: dist/python/
+          if-no-files-found: error
+          retention-days: 7
+
+  npm:
+    needs: build
+    if: vars.PUBLISH_NPM == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      # Trusted publishing needs npm 11.5.1 or newer; Node 26 ships npm 11.20.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26
+          registry-url: https://registry.npmjs.org
+      - run: npm --version
+      # Provenance is generated automatically for a public repository.
+      - name: npm publish
+        working-directory: packages/node
+        run: npm publish --access public
+
+  pypi:
+    needs: build
+    if: vars.PUBLISH_PYPI == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: python-dist
+          path: dist/python/
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: dist/python/
+
+  crates:
+    needs: build
+    if: vars.PUBLISH_CRATES == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - run: rustup toolchain install 1.99.1 --profile minimal && rustup default 1.99.1
+      # Exchanges this workflow's OIDC token for a short-lived crates.io token.
+      - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
+        id: auth
+      - name: cargo publish
+        run: cargo publish --locked --manifest-path packages/rust/Cargo.toml
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
