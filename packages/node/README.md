@@ -4,11 +4,21 @@ Server-side helper for Sign in with NobleID, a thin layer over
 [openid-client](https://github.com/panva/openid-client) v6 with NobleID's
 settings chosen for you. TypeScript types included (`index.d.ts`).
 
-Install it from a checkout of this repository, by path:
-`npm install ./packages/node` (or `"nobleid-signin": "file:../path/to/packages/node"`
-in `package.json`), or copy `index.mjs` and `index.d.ts`. The package is
-**not yet published** to npm: do not `npm install nobleid-signin` from the
-registry, as anything there under that name is not ours.
+## Install
+
+Releases go to npm as `nobleid-signin`, published by this repository's
+release workflow with [provenance](https://docs.npmjs.com/generating-provenance-statements):
+
+```sh
+npm install nobleid-signin
+```
+
+Only a package whose npm page links back to
+[github.com/signinwithnobleid/sign-in-with-nobleid](https://github.com/signinwithnobleid/sign-in-with-nobleid) and shows a provenance badge is ours. Until 0.1.0
+appears on npm, install it from a checkout of this repository, by path
+(`npm install ./packages/node`), or copy `index.mjs` and `index.d.ts`.
+
+## Use
 
 ```js
 import { createNobleIdClient, NobleIdError } from "nobleid-signin";

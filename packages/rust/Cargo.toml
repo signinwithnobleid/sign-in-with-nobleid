@@ -1,13 +1,18 @@
 [package]
 name = "nobleid-signin"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
 rust-version = "1.88"
 license = "Apache-2.0"
 description = "Server-side helper for Sign in with NobleID, built on the openidconnect crate."
 readme = "README.md"
+authors = ["NobleID"]
+repository = "https://github.com/signinwithnobleid/sign-in-with-nobleid"
+homepage = "https://github.com/signinwithnobleid/sign-in-with-nobleid/tree/main/packages/rust"
+documentation = "https://docs.rs/nobleid-signin"
 keywords = ["nobleid", "openid", "oidc", "oauth2", "orcid"]
 categories = ["authentication", "web-programming"]
+include = ["src/**/*.rs", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "NOTICE"]
 
 [lib]
 name = "nobleid_signin"

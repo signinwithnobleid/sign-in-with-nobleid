@@ -1,8 +1,8 @@
 # Python
 
 Helper: [`packages/python`](../../packages/python/README.md) over Authlib 1.9.
-Install it from this repository (`pip install ./packages/python`); it is not
-yet published to PyPI.
+Install it with `pip install "nobleid-signin[flask]"`. Until 0.1.0 appears on
+PyPI, install it from this repository (`pip install "./packages/python[flask]"`).
 Example: [`examples/python-flask-authlib`](../../examples/python-flask-authlib/README.md).
 
 ```python

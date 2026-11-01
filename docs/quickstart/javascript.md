@@ -6,9 +6,10 @@ Helper: [`packages/node`](../../packages/node/README.md) (openid-client 6.8.8,
 TypeScript types included). Example:
 [`examples/node-openid-client`](../../examples/node-openid-client/README.md).
 
-Install it from this repository (`npm install ./packages/node`, or copy
-`index.mjs` and `index.d.ts`). `nobleid-signin` is not yet published to the
-npm registry: a package of that name there is not ours.
+Install it with `npm install nobleid-signin`. Until 0.1.0 appears on npm,
+install it from this repository (`npm install ./packages/node`, or copy
+`index.mjs` and `index.d.ts`). Only a `nobleid-signin` whose npm page links
+back to this repository is ours.
 
 ```js
 import { createNobleIdClient } from "nobleid-signin";

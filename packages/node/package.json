@@ -1,7 +1,16 @@
 {
   "name": "nobleid-signin",
-  "version": "1.0.0",
-  "description": "Server-side helper for Sign in with NobleID, built on openid-client.",
+  "version": "0.1.0",
+  "description": "Server-side helper for Sign in with NobleID (OpenID Connect), built on openid-client.",
+  "keywords": ["nobleid", "openid-connect", "oidc", "oauth2", "pkce", "sign-in", "orcid", "researcher"],
+  "homepage": "https://github.com/signinwithnobleid/sign-in-with-nobleid/tree/main/packages/node#readme",
+  "bugs": { "url": "https://github.com/signinwithnobleid/sign-in-with-nobleid/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/signinwithnobleid/sign-in-with-nobleid.git",
+    "directory": "packages/node"
+  },
+  "author": "NobleID",
   "license": "Apache-2.0",
   "type": "module",
   "main": "index.mjs",
@@ -9,5 +18,6 @@
   "exports": { ".": { "types": "./index.d.ts", "default": "./index.mjs" } },
   "files": ["index.mjs", "index.d.ts", "README.md", "LICENSE", "NOTICE"],
   "engines": { "node": ">=22" },
-  "dependencies": { "openid-client": "6.8.8" }
+  "dependencies": { "openid-client": "6.8.8" },
+  "publishConfig": { "access": "public", "provenance": true }
 }

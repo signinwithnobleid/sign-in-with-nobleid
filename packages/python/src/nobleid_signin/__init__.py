@@ -34,7 +34,7 @@ from authlib.integrations.flask_client.apps import FlaskOAuth2App
 from authlib.integrations.requests_client import OAuth2Session
 
 __all__ = ["NobleID", "NobleIdError", "NOBLEID_ISSUER", "DEFAULT_SCOPE", "granted", "profile_from_claims"]
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 
 NOBLEID_ISSUER = "https://id.nobleid.org"
 DEFAULT_SCOPE = "openid profile email"

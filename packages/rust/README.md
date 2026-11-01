@@ -18,12 +18,15 @@ settings already chosen. It does no cryptography of its own.
 
 ## Install
 
-Not yet published on crates.io: use it from a checkout of this repository,
-by path. Do not install a crate of this name from a registry; it is not ours.
+Releases go to crates.io as `nobleid-signin`, published by this repository's
+release workflow through crates.io trusted publishing. Only a crate whose
+crates.io page links back to [github.com/signinwithnobleid/sign-in-with-nobleid](https://github.com/signinwithnobleid/sign-in-with-nobleid) is ours. Until 0.1.0
+appears on crates.io, use a path or git dependency on this repository
+instead of the version below.
 
 ```toml
 [dependencies]
-nobleid-signin = { path = "path/to/packages/rust" }
+nobleid-signin = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
