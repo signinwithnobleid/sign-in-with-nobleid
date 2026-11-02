@@ -8,6 +8,7 @@ NobleID credentials are used or needed, anywhere.
 | `npm test` | everything below that the local machine has a toolchain for |
 | `npm run test:mock` | protocol conformance of the mock itself |
 | `npm run test:sdk` | the browser SDK and researcher badge, in Node with small DOM shims |
+| `npm run test:brand` | the button files in `brand/buttons/` are current and complete, meet the contrast rules, and match the SDK's button |
 | `node test/run-example.mjs <name>` | one server example, end to end |
 | `node test/run-example.mjs --all` | every server example |
 | `node test/wordpress.test.mjs` | the WordPress plugin's exact request shape |

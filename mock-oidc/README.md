@@ -47,6 +47,35 @@ behind a proxy, tunnel or port forward. Its issuer is always
 `http://localhost:<port>`, so a client configured for it cannot be pointed at
 NobleID by accident, and NobleID's tokens are never accepted by it.
 
+## Use it from your own app
+
+To build your sign-in before you register an app, run the mock from a clone
+of this repository (Node 22+, nothing to install) and point your app at it:
+
+```sh
+git clone https://github.com/signinwithnobleid/sign-in-with-nobleid.git
+node sign-in-with-nobleid/mock-oidc/server.mjs --port 9400 --clients sign-in-with-nobleid/test/clients.json
+```
+
+| Setting | Value |
+|---|---|
+| Issuer | `http://localhost:9400` (your library reads the rest from discovery) |
+| Confidential client | `nbcl_mockconfidential00000000`, secret `nbcs_mock-secret-not-real` |
+| Public client | `nbcl_mockpublic00000000000000` (no secret) |
+| Redirect URI | one listed in [`test/clients.json`](../test/clients.json), e.g. `http://localhost:3000/callback` or `http://localhost:8080/callback.html`: on `localhost` any port matches, the path must not differ |
+
+- **Browser SDK:** call
+  `NobleID.configure({ issuer: "http://localhost:9400", authorizationEndpoint: "http://127.0.0.1:9400/oauth/authorize" })`
+  on the page with the button **and** on the callback page. Without it on
+  the callback page, `handleCallback` fails with `invalid_issuer`.
+- **Node helper:** `createNobleIdClient({ issuer: "http://localhost:9400", allowInsecureLocalhost: true, clientId, clientSecret })`.
+- **Any other library:** set the issuer and allow `http` for `localhost`
+  only (see [library settings](../docs/troubleshooting.md#library-settings)).
+
+Clicking the button signs in the test user, Ada Example, with no password
+and no consent screen. When it works, register your app and swap in
+`https://id.nobleid.org` and your own client ID and secret.
+
 ## Test controls
 
 Only the mock has these. JSON in, JSON out.

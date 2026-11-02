@@ -10,6 +10,7 @@
     "test": "node test/run-all.mjs",
     "test:mock": "node --test test/mock.test.mjs",
     "test:sdk": "node --test test/sdk.test.mjs",
+    "test:brand": "node --test test/brand.test.mjs",
     "test:profile": "node --test test/profile.test.mjs",
     "test:examples": "node test/run-example.mjs --all"
   }

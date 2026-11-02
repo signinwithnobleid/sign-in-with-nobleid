@@ -14,9 +14,20 @@ npm install nobleid-signin
 ```
 
 Only a package whose npm page links back to
-[github.com/signinwithnobleid/sign-in-with-nobleid](https://github.com/signinwithnobleid/sign-in-with-nobleid) and shows a provenance badge is ours. Until 0.1.0
-appears on npm, install it from a checkout of this repository, by path
-(`npm install ./packages/node`), or copy `index.mjs` and `index.d.ts`.
+[github.com/signinwithnobleid/sign-in-with-nobleid](https://github.com/signinwithnobleid/sign-in-with-nobleid) and shows a provenance badge is ours.
+
+**Until 0.1.0 appears on npm** (`npm install nobleid-signin` answers 404),
+install it from a checkout of this repository, from your own app's folder:
+
+```sh
+git clone https://github.com/signinwithnobleid/sign-in-with-nobleid.git
+npm install --install-links ./sign-in-with-nobleid/packages/node
+```
+
+Keep `--install-links` (npm 9 or later). Without it npm only links the folder
+and does not install `openid-client`, and your app fails with
+`Cannot find package 'openid-client'`. Or copy `index.mjs` and `index.d.ts`
+into your app and `npm install openid-client@6.8.8`.
 
 ## Use
 
@@ -39,6 +50,9 @@ res.redirect(url);
 // GET /callback
 const tx = req.session.nobleid;
 delete req.session.nobleid;                 // single use
+// The full URL NobleID sent the browser to, query included.
+// Express: new URL(req.originalUrl, process.env.REDIRECT_URI)
+const fullCallbackUrl = new URL(req.originalUrl, process.env.REDIRECT_URI);
 const { tokens, claims, scope } = await nobleid.finishSignIn(fullCallbackUrl, tx);
 const info = await nobleid.userinfo(tokens.access_token, claims.sub);
 // key the account on claims.sub; read `scope` for what was granted

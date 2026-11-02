@@ -192,7 +192,7 @@ async function rejects(p, code) {
 
 test("version and public API are backwards compatible", () => {
   const { NobleID } = makeBrowser();
-  assert.equal(NobleID.version, "2.1.1");
+  assert.equal(NobleID.version, "2.2.0");
   for (const k of ["renderButton", "createButton", "createAuthorizeUrl", "signIn", "handleCallback", "revoke", "configure", "renderResearcherBadge"]) {
     assert.equal(typeof NobleID[k], "function", k);
   }

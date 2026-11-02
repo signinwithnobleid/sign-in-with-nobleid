@@ -1,4 +1,4 @@
-// Type declarations for nobleid-auth.js (the browser SDK), v2.1.1.
+// Type declarations for nobleid-auth.js (the browser SDK), v2.2.0.
 
 export interface NobleIDEndpoints {
   authorization: string;
@@ -28,11 +28,20 @@ export interface AuthorizeOptions {
 export interface ButtonOptions extends Partial<AuthorizeOptions> {
   /** Your server's sign-in route (confidential client). Same-site path or https URL. */
   loginUrl?: string;
-  theme?: "light" | "dark";
-  size?: "sm" | "md" | "lg";
-  label?: "Sign in with NobleID" | "Continue with NobleID";
+  /** Same names as brand/buttons/nobleid-<label>-<theme>-<shape>-<size>.svg. "light" and "dark" are the 2.1 names of white and black. */
+  theme?: ButtonTheme | "light" | "dark";
+  shape?: ButtonShape;
+  /** sm 40 px, md 44 px (default), lg 48 px tall. */
+  size?: ButtonSize;
+  /** "icon" is the mark alone; its accessible name is "Sign in with NobleID". The 2.1 wordings are still accepted. */
+  label?: ButtonLabel | "Sign in with NobleID" | "Continue with NobleID";
   onError?: (error: NobleIDError) => void;
 }
+
+export type ButtonTheme = "white" | "black" | "green" | "outline-white" | "outline-black";
+export type ButtonShape = "rounded" | "pill" | "square";
+export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonLabel = "sign-in" | "continue" | "icon";
 
 export interface CallbackResult {
   tokens: { access_token: string; token_type: string; expires_in: number; scope: string; id_token: string; refresh_token?: string };

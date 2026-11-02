@@ -3,6 +3,21 @@
 All notable changes to this kit. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0 a minor version may change the helpers' API.
 
+## Unreleased
+
+- **The button set**: `brand/buttons/` holds every label (Sign in, Continue,
+  icon only) in every theme (white, black, green, outline-white,
+  outline-black), shape (rounded, pill, square) and size (40, 44, 48 px):
+  135 SVG files named `nobleid-<label>-<theme>-<shape>-<size>.svg`, with a
+  `manifest.json`, built by `scripts/build-buttons.mjs` from the master mark.
+  Also `brand/nobleid-mark-white.svg`. The original seven files are unchanged.
+- **Browser SDK 2.2.0**: `shape`, `theme`, `size` and `label` take the same
+  words as the files; 2.1 values still work. See [sdk/README.md](sdk/README.md#changes-in-220).
+- **Brand guide**: which theme on which background, contrast (WCAG AA),
+  clear space, minimum size and the focus ring.
+- **Docs**: how to point your own app at the local mock; installing the Node
+  helper from a clone needs `npm install --install-links`.
+
 ## 0.1.0 (2 November 2026)
 
 The first tagged release of the Sign in with NobleID client kit.
