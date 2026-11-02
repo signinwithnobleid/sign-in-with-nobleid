@@ -12,7 +12,8 @@
         "http://localhost/signin-oidc",
         "http://localhost/auth/nobleid/callback",
         "http://localhost/wp-admin/admin-ajax.php?action=openid-connect-authorize"
-      ]
+      ],
+      "post_logout_redirect_uris": ["http://localhost:3000/signed-out"]
     },
     {
       "client_id": "nbcl_mockpublic00000000000000",
@@ -21,7 +22,8 @@
         "http://localhost/callback.html",
         "http://localhost/callback",
         "com.example.app:/callback"
-      ]
+      ],
+      "post_logout_redirect_uris": ["http://localhost:8080/signed-out.html"]
     }
   ]
 }

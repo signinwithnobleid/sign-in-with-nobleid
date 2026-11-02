@@ -43,4 +43,5 @@ Also (see the example):
 - A denial arrives in `OnRemoteFailure` as `OpenIdConnectProtocolException`
   with the code in `ex.Data["error"]`.
 - Revocation: `configuration.RevocationEndpoint`; post to it yourself. Sign
-  out of the cookie scheme only; there is no end-session endpoint.
+  out of the cookie scheme. To end the NobleID session too, see
+  [logout](../logout.md).

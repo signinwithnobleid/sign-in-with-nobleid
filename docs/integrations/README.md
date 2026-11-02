@@ -32,7 +32,7 @@ Every guide uses these.
 | Userinfo endpoint | `https://id.nobleid.org/oauth/userinfo` |
 | JWKS URL | `https://id.nobleid.org/.well-known/jwks.json` |
 | Revocation endpoint | `https://id.nobleid.org/oauth/revoke` |
-| End-session / logout URL | none. Leave it empty. Signing out is local to your platform. |
+| End-session / logout URL | optional: `https://www.nobleid.org/oauth/logout`. Empty keeps signing out local to your platform. See [logout](../logout.md). |
 | ID token signing | ES256 only |
 | PKCE | S256. Required for public clients; recommended for the server-side (confidential) clients in these guides. |
 | Client authentication | `client_secret_basic` or `client_secret_post` |

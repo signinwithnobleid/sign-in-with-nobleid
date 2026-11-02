@@ -25,7 +25,7 @@ site; everything else is on the issuer `https://id.nobleid.org`. Use
 discovery and your library handles it.
 
 **Is there a logout / end-session endpoint?**
-No. Revoke your tokens and clear your session. See [logout](logout.md).
+Yes: `https://www.nobleid.org/oauth/logout` (RP-Initiated Logout 1.0). Revoke your tokens and clear your session first; use the endpoint if the person should be signed out of NobleID too. There is no front- or back-channel logout. See [logout](logout.md).
 
 **Is there a sandbox?**
 Use the local mock in [`mock-oidc/`](../mock-oidc/README.md). It mirrors the

@@ -12,8 +12,8 @@
  *   node mock-oidc/server.mjs --port 9400 --clients test/clients.json
  *
  * The issuer is http://localhost:<port>. As in production, the authorization
- * endpoint lives on a different host than the issuer: here it is
- * http://127.0.0.1:<port>/oauth/authorize.
+ * and end-session endpoints live on a different host than the issuer: here
+ * http://127.0.0.1:<port>/oauth/authorize and /oauth/logout.
  *
  * Endpoints under /__mock/ are test controls (see README.md). They exist only
  * in this mock.
@@ -186,6 +186,28 @@ function newSigningKey() {
   return { privateKey, kid, publicJwk: { kty: "EC", crv: "P-256", x: jwk.x, y: jwk.y, kid, alg: "ES256", use: "sig" } };
 }
 
+/** An ES256 JWT's claims if one of `keys` (current or retired) signed it, else null. Expiry is not checked. */
+function verifyJwt(keys, jwt) {
+  const parts = String(jwt).split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const header = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
+    const key = header.alg === "ES256" && keys.find((k) => k.kid === header.kid);
+    if (!key) return null;
+    const ok = crypto.verify(
+      "sha256",
+      Buffer.from(parts[0] + "." + parts[1]),
+      { key: crypto.createPublicKey(key.privateKey), dsaEncoding: "ieee-p1363" },
+      Buffer.from(parts[2], "base64url")
+    );
+    if (!ok) return null;
+    const claims = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    return claims && typeof claims === "object" ? claims : null;
+  } catch {
+    return null;
+  }
+}
+
 function signJwt(key, payload) {
   const header = { alg: "ES256", typ: "JWT", kid: key.kid };
   const input = b64url(JSON.stringify(header)) + "." + b64url(JSON.stringify(payload));
@@ -213,6 +235,7 @@ export function createMock(options = {}) {
     par: new Map(),
     lastAuthorize: null,
     lastToken: null,
+    lastEndSession: null,
   };
 
   let issuer = options.issuer || null;
@@ -220,6 +243,7 @@ export function createMock(options = {}) {
 
   const endpoints = () => ({
     authorization_endpoint: authorizeOrigin + "/oauth/authorize",
+    end_session_endpoint: authorizeOrigin + "/oauth/logout",
     token_endpoint: issuer + "/oauth/token",
     userinfo_endpoint: issuer + "/oauth/userinfo",
     revocation_endpoint: issuer + "/oauth/revoke",
@@ -359,6 +383,75 @@ export function createMock(options = {}) {
         `<h1>Sign-in request rejected</h1><p id="error" data-error="${escapeHtml(error)}">${escapeHtml(error)}: ${escapeHtml(description)}</p>`,
       { "Content-Type": "text/html; charset=utf-8" }
     );
+  }
+
+  /* ── end session (OpenID Connect RP-Initiated Logout 1.0) ── */
+
+  // Same checks and messages as the provider. Every refusal is shown here and
+  // nobody is redirected. The mock keeps no browser session, so there is
+  // nothing to end and nobody to ask: a valid request goes straight back.
+  function logoutError(res, description) {
+    send(
+      res,
+      400,
+      `<!doctype html><meta charset="utf-8"><title>NobleID (mock) – sign-out</title>` +
+        `<h1>This sign-out request can't be completed</h1><p id="error" data-error="invalid_request">${escapeHtml(description)}</p>`,
+      { "Content-Type": "text/html; charset=utf-8" }
+    );
+  }
+
+  async function endSession(req, res, url) {
+    let q;
+    if (req.method === "POST") {
+      // An HTML form POST, as the provider accepts.
+      const ct = String(req.headers["content-type"] || "").toLowerCase();
+      if (!ct.startsWith("application/x-www-form-urlencoded")) return logoutError(res, "A sign-out form must be application/x-www-form-urlencoded.");
+      let raw;
+      try {
+        raw = await readBody(req, 16 * 1024);
+      } catch {
+        return logoutError(res, "The sign-out request is too large.");
+      }
+      q = parseParams(raw).params;
+    } else {
+      q = parseParams(url.search.slice(1)).params;
+    }
+    st.lastEndSession = {
+      id_token_hint: q.id_token_hint ? "(present)" : null,
+      client_id: q.client_id || null,
+      post_logout_redirect_uri: q.post_logout_redirect_uri || null,
+      state: q.state || null,
+      method: req.method,
+    };
+
+    let clientId = String(q.client_id || "").trim() || null;
+    if (q.id_token_hint) {
+      // An expired hint is fine: it is usually past its exp by sign-out time.
+      const c = verifyJwt(st.keys, q.id_token_hint);
+      if (!c || c.iss !== issuer) return logoutError(res, "The sign-out request carries an ID token NobleID did not issue.");
+      const aud = typeof c.aud === "string" ? c.aud : Array.isArray(c.aud) && c.aud.length === 1 ? c.aud[0] : null;
+      if (!aud) return logoutError(res, "The ID token in the sign-out request names no app.");
+      if (clientId && clientId !== aud) return logoutError(res, "client_id does not match the app the ID token was issued to.");
+      clientId = aud;
+    }
+    const client = clientId ? clients.get(clientId) : null;
+    if (clientId && !client) {
+      return logoutError(res, "The app that sent you here is not registered with NobleID, or is switched off. Nobody was sent anywhere.");
+    }
+    const back = q.post_logout_redirect_uri;
+    if (!back) {
+      return send(res, 200, `<!doctype html><meta charset="utf-8"><title>NobleID (mock) – signed out</title><h1 id="signed-out">You are signed out of NobleID</h1>`, {
+        "Content-Type": "text/html; charset=utf-8",
+      });
+    }
+    if (!client) return logoutError(res, "A return address needs the app to be identified (id_token_hint or client_id).");
+    // Exact match only: no loopback-port leeway, unlike sign-in redirect URIs.
+    if (!(client.post_logout_redirect_uris || []).includes(back)) {
+      return logoutError(res, "This return address is not registered for the app. Nobody was sent anywhere.");
+    }
+    const to = q.state ? back + (back.includes("?") ? "&" : "?") + "state=" + encodeURIComponent(q.state) : back;
+    st.lastEndSession.redirected = to;
+    return send(res, 302, "", { Location: to });
   }
 
   /* ── client authentication (token, revoke, introspect, PAR) ── */
@@ -792,7 +885,7 @@ export function createMock(options = {}) {
       out[fam.clientId].liveRefreshTokens += live;
       out[fam.clientId].families.push({ id: fid, generation: fam.generation, revoked: fam.revoked, scope: [...fam.scopes].join(" ") });
     }
-    return { clients: out, lastAuthorize: st.lastAuthorize, lastToken: st.lastToken, keys: st.keys.map((k) => k.kid) };
+    return { clients: out, lastAuthorize: st.lastAuthorize, lastToken: st.lastToken, lastEndSession: st.lastEndSession, keys: st.keys.map((k) => k.kid) };
   }
 
   async function control(req, res, url) {
@@ -824,6 +917,7 @@ export function createMock(options = {}) {
         st.rateLimit = { remaining: 0, retryAfter: 1 };
         st.lastAuthorize = null;
         st.lastToken = null;
+        st.lastEndSession = null;
         return send(res, 200, { ok: true });
       case "/__mock/next-authorize":
         st.next = data;
@@ -862,6 +956,7 @@ export function createMock(options = {}) {
         return send(res, 200, { keys: st.keys.map((k) => k.publicJwk) }, { ...CORS, "Cache-Control": "public, max-age=300" });
       }
       if (path === "/oauth/authorize" && req.method === "GET") return authorize(req, res, url);
+      if (path === "/oauth/logout" && (req.method === "GET" || req.method === "POST")) return await endSession(req, res, url);
       if (path === "/oauth/token" && req.method === "POST") return await token(req, res);
       if (path === "/oauth/userinfo" && (req.method === "GET" || req.method === "POST")) return await userinfo(req, res, url);
       if (path === "/oauth/works" && req.method === "GET") return await works(req, res, url);

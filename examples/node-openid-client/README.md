@@ -32,7 +32,8 @@ node test/run-example.mjs node-openid-client
 | `GET /callback` | state → iss → error → code exchange → ID token verified (ES256 via JWKS) → userinfo; new session id |
 | `GET /works` | `/oauth/works` |
 | `POST /refresh` | refresh grant; stores the rotated refresh token |
-| `POST /logout` | revoke refresh + access token, clear the session |
+| `POST /logout` | revoke refresh + access token, clear the session; with `POST_LOGOUT_REDIRECT_URI`, then end the NobleID session |
+| `GET /signed-out` | (with `POST_LOGOUT_REDIRECT_URI`) back from NobleID's sign-out page; checks `state` |
 
 The session store is in memory: use a real one in production. A session is
 created only when sign-in starts at `/login`; sessions idle for 8 hours are
@@ -42,4 +43,12 @@ prefix. POST routes check a CSRF token (compared in constant time) and the
 locally, because NobleID may already have rotated the refresh token.
 
 Environment: `ISSUER` (default `https://id.nobleid.org`), `CLIENT_ID`,
-`CLIENT_SECRET`, `REDIRECT_URI`, `PORT`, `SCOPE`.
+`CLIENT_SECRET`, `REDIRECT_URI`, `PORT`, `SCOPE`, and optionally
+`POST_LOGOUT_REDIRECT_URI`.
+
+Sign-out ends this app's session. To end the NobleID session too, set
+`POST_LOGOUT_REDIRECT_URI` to `http://localhost:3000/signed-out` and register
+that exact address as a sign-out return URL of your app. Sign-out then sends
+the browser to NobleID's end-session endpoint with the ID token and a
+`state`. NobleID asks the person, then sends them back. See
+[docs/logout.md](../../docs/logout.md).

@@ -8,6 +8,8 @@
  *   GET  /works       <pre id="works">{json}</pre>                  [profile.works]
  *   POST /refresh     refresh-token grant (rotation)                 [profile.refresh]
  *   POST /logout      revoke + clear session                         [profile.logout]
+ *                     with profile.endSession: then a redirect to the provider's
+ *                     end_session_endpoint, back to GET /signed-out?state=…
  *
  * The driver acts as the browser and the user, and asks the mock what happened.
  */
@@ -157,7 +159,22 @@ export async function runScenarios({ appUrl, mockUrl, clientId, profile = {}, lo
     }
 
     if (p.logout) {
-      await postForm(jar, "/logout");
+      const out = await postForm(jar, "/logout");
+      if (p.endSession) {
+        // RP-Initiated Logout: off to the provider, which sends the browser back with our state.
+        const meta = await mock("/.well-known/openid-configuration");
+        assert.ok(out.location && out.location.startsWith(meta.end_session_endpoint + "?"), `logout did not go to the end-session endpoint: ${out.location}`);
+        const sent = new URL(out.location).searchParams;
+        assert.ok(sent.get("id_token_hint"), "no id_token_hint");
+        assert.ok(sent.get("state"), "no state");
+        const back = await request(jar, out.location);
+        assert.equal(back.status, 302, `end-session refused: ${back.text.slice(0, 300)}`);
+        assert.ok(onApp(back.location), `end-session sent the browser off the app: ${back.location}`);
+        assert.equal(new URL(back.location).searchParams.get("state"), sent.get("state"), "state not returned");
+        const page = await follow(jar, await request(jar, back.location), onApp);
+        assert.match(page.text, /id=["']signed-out["']/, "sign-out return page lacks id=\"signed-out\"");
+        log("  # end session ok");
+      }
       await expectSignedOut(jar, "after logout");
       const s = await clientState();
       if (p.revokeOnLogout !== false) {

@@ -25,7 +25,7 @@ Discovery fills in the rest. Check the values:
 |---|---|
 | Authorization URL | `https://www.nobleid.org/oauth/authorize` (www host; correct) |
 | Token URL | `https://id.nobleid.org/oauth/token` |
-| Logout URL | **empty**. NobleID has no end-session endpoint. |
+| Logout URL | empty (sign-out stays in Keycloak), or `https://www.nobleid.org/oauth/logout` to end the NobleID session too. See [Logout](#logout). |
 | User Info URL | `https://id.nobleid.org/oauth/userinfo` |
 | Issuer | `https://id.nobleid.org` |
 | Validate Signatures | On |
@@ -139,9 +139,12 @@ reads the claims in the ID token, where `identity_verified` is.
 
 ## Logout
 
-NobleID has no end-session endpoint, so leave **Logout URL** empty and
-**Backchannel logout** off. Keycloak logout ends the Keycloak session. The user
-stays signed in at nobleid.org.
+With **Logout URL** empty, Keycloak logout ends the Keycloak session and the
+user stays signed in at nobleid.org. To sign them out of NobleID too, set it to
+`https://www.nobleid.org/oauth/logout` and register Keycloak's broker
+address, `https://<keycloak-host>/realms/<realm>/broker/<alias>/endpoint/logout_response`,
+as a sign-out return URL of your NobleID app (see [logout](../logout.md)). Leave **Backchannel logout**
+off: NobleID has no back-channel logout.
 
 ## Profile fields
 

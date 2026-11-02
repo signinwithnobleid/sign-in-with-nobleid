@@ -102,9 +102,9 @@ fields with it: [docs/profile-data.md](../../docs/profile-data.md).
 - **Refresh-issued ID tokens** have no `nonce`, `auth_time` or `amr`.
   `refresh()` verifies them without a nonce and, given `$expectedSub`, checks
   the user did not change.
-- **Sign-out:** NobleID has no end-session endpoint. Revoke the refresh token
-  (that also ends its access tokens), revoke the access token, then clear
-  your own session.
+- **Sign-out:** revoke the refresh token (that also ends its access tokens),
+  revoke the access token, then clear your own session. Ending the NobleID
+  session too is optional: [logout](../../docs/logout.md).
 - **Scopes can be unticked** by the user, except `openid`. Read `scope` from
   the result, not from your request.
 - **Rate limits:** a `NobleIdException` with `error` `slow_down` and `status`

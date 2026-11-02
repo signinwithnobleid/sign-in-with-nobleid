@@ -12,14 +12,24 @@ node mock-oidc/server.mjs --port 9400 --clients test/clients.json
   `/.well-known/oauth-authorization-server`.
 - Authorization endpoint: `http://127.0.0.1:9400/oauth/authorize`, a
   different host from the issuer, as in production. Use discovery.
+- End-session endpoint (RP-Initiated Logout 1.0):
+  `http://127.0.0.1:9400/oauth/logout`, on that same host, GET or form POST.
+  Same checks and messages as NobleID: the `id_token_hint` must be signed by
+  one of the mock's keys (expired is fine) and name one client; `client_id`,
+  if sent, must match it; `post_logout_redirect_uri` must exactly match one
+  of the client's `post_logout_redirect_uris` (no port leeway); `state` comes
+  back unchanged. Refusals are shown, never redirected. The mock keeps no
+  browser session, so it does not ask the person first: a valid request goes
+  straight back.
 - A fresh ES256 (P-256) signing key is generated at every start; its `kid`
   is the RFC 7638 thumbprint. No key is ever written to disk.
 - `/oauth/authorize` signs in a fixed test user and approves every requested
   scope, unless a test control says otherwise.
 - Clients come from a JSON file (see [`test/clients.json`](../test/clients.json)):
   `client_id`, `client_secret` (confidential only), `type`
-  (`confidential` | `public`), `redirect_uris`. The bundled ones are fake and
-  work nowhere else.
+  (`confidential` | `public`), `redirect_uris`, and optionally
+  `post_logout_redirect_uris` (sign-out return URLs). The bundled ones are
+  fake and work nowhere else.
 
 It mirrors the provider's public behaviour: code flow only, `iss` on every
 redirect (errors included), errors before the client and redirect URI match
@@ -63,6 +73,7 @@ node sign-in-with-nobleid/mock-oidc/server.mjs --port 9400 --clients sign-in-wit
 | Confidential client | `nbcl_mockconfidential00000000`, secret `nbcs_mock-secret-not-real` |
 | Public client | `nbcl_mockpublic00000000000000` (no secret) |
 | Redirect URI | one listed in [`test/clients.json`](../test/clients.json), e.g. `http://localhost:3000/callback` or `http://localhost:8080/callback.html`: on `localhost` any port matches, the path must not differ |
+| Sign-out return URL | `http://localhost:3000/signed-out` (confidential) or `http://localhost:8080/signed-out.html` (public): exact, port included |
 
 - **Browser SDK:** call
   `NobleID.configure({ issuer: "http://localhost:9400", authorizationEndpoint: "http://127.0.0.1:9400/oauth/authorize" })`
@@ -93,7 +104,7 @@ Only the mock has these. JSON in, JSON out.
 | `POST /__mock/rotate-key` | | New signing key; the old one stays in the JWKS |
 | `POST /__mock/expire-codes` | | Expire outstanding codes |
 | `POST /__mock/reset` | | Forget all tokens, grants and overrides |
-| `GET /__mock/state` | | Live token counts and refresh families per client, last authorize parameters, last token request's auth method |
+| `GET /__mock/state` | | Live token counts and refresh families per client, last authorize parameters, last token request's auth method, last end-session request (the hint shown only as present) |
 
 ## As a library
 

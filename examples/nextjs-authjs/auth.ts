@@ -125,7 +125,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     },
   },
   events: {
-    // NobleID has no end-session endpoint. Signing out = revoke the refresh
+    // Local sign-out (NobleID's end-session endpoint is optional): revoke the refresh
     // token (which ends its access tokens) and the access token, then Auth.js
     // clears the session cookie.
     async signOut(message) {

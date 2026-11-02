@@ -17,6 +17,15 @@ before 1.0 a minor version may change the helpers' API.
   clear space, minimum size and the focus ring.
 - **Docs**: how to point your own app at the local mock; installing the Node
   helper from a clone needs `npm install --install-links`.
+- **Sign-out**: NobleID now has an end-session endpoint,
+  `https://www.nobleid.org/oauth/logout` (OpenID Connect RP-Initiated
+  Logout 1.0, in discovery). The logout guide, FAQ, troubleshooting, platform
+  guides, READMEs and code comments describe it as optional; no front- or
+  back-channel logout. WordPress cannot use it: the plugin's return address
+  carries the user's language, so NobleID refuses it.
+- **Mock**: `/oauth/logout` with the provider's checks and messages, and
+  `post_logout_redirect_uris` per client. The Node example can end the
+  NobleID session (`POST_LOGOUT_REDIRECT_URI`), and its end-to-end test does.
 
 ## 0.1.0 (2 November 2026)
 

@@ -28,7 +28,7 @@ Discourse first.
 | `openid connect email verified claim fallback` | off (default) |
 | `openid connect email claim` | `email` (default) |
 | `openid connect overrides email` | off. See the caution below. |
-| `openid connect rp initiated logout` | **off**. NobleID has no end-session endpoint. |
+| `openid connect rp initiated logout` | off (sign-out stays in Discourse), or on to end the NobleID session too. See [Logout](#logout). |
 | `openid connect rp initiated logout redirect` | empty |
 | `openid connect allow association change` | your choice |
 | `openid connect authorize parameters` | empty |
@@ -67,9 +67,11 @@ password or another provider.
 
 ### Logout
 
-Leave `openid connect rp initiated logout` off. NobleID publishes no
-`end_session_endpoint`. Logging out of Discourse ends the Discourse session
-only. The user stays signed in at nobleid.org.
+With `openid connect rp initiated logout` off, logging out of Discourse ends
+the Discourse session only and the user stays signed in at nobleid.org.
+NobleID publishes an `end_session_endpoint`; to use it, turn the setting on
+and register the address in `openid connect rp initiated logout redirect` as
+a sign-out return URL of your NobleID app (see [logout](../logout.md)).
 
 ## Profile fields
 

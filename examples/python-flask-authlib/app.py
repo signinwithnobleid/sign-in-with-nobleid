@@ -177,7 +177,7 @@ def logout():
     with STORE_LOCK:
         s = STORE.pop(session.get("key"), None)
     if s:
-        # NobleID has no end-session endpoint: revoke, then forget the session.
+        # Logout (local): revoke, then forget the session. Ending the NobleID session is optional (docs/logout.md).
         for name, hint in (("refresh_token", "refresh_token"), ("access_token", "access_token")):
             if s["tokens"].get(name):
                 try:

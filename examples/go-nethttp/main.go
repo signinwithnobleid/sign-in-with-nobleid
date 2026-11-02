@@ -383,7 +383,7 @@ func (a *app) logout(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	tokens := s.tokens
 	s.mu.Unlock()
-	// NobleID has no end-session endpoint: revoke, then clear our session.
+	// Logout (local): revoke, then clear our session. Ending the NobleID session is optional (docs/logout.md).
 	if tokens != nil {
 		if tokens.RefreshToken != "" {
 			if err := a.nobleid.Revoke(r.Context(), tokens.RefreshToken, "refresh_token"); err != nil {

@@ -38,7 +38,7 @@ value the plugin's settings page shows and register that.
 | Login Endpoint URL | `https://www.nobleid.org/oauth/authorize` |
 | Userinfo Endpoint URL | `https://id.nobleid.org/oauth/userinfo` |
 | Token Validation Endpoint URL | `https://id.nobleid.org/oauth/token` |
-| End Session Endpoint URL | **leave empty** (NobleID has none) |
+| End Session Endpoint URL | **leave empty** (see [Sign-out](#sign-out)) |
 | JWKS URI | `https://id.nobleid.org/.well-known/jwks.json` |
 | Issuer | `https://id.nobleid.org` |
 | ACR values | leave empty |
@@ -65,8 +65,8 @@ it.
 
 The plugin's discovery import also works with
 `https://id.nobleid.org/.well-known/openid-configuration`; check afterwards
-that the Issuer and JWKS fields are filled and the end-session field is
-empty.
+that the Issuer and JWKS fields are filled. The import also fills End Session
+Endpoint URL from discovery: **clear it**.
 
 The import fills the fields on the page only. Press **Save Changes** to keep
 them.
@@ -77,6 +77,20 @@ To keep the secret out of the database, define it in `wp-config.php`:
 define( 'OIDC_CLIENT_ID', getenv( 'NOBLEID_CLIENT_ID' ) );
 define( 'OIDC_CLIENT_SECRET', getenv( 'NOBLEID_CLIENT_SECRET' ) );
 ```
+
+### Sign-out
+
+Leave End Session Endpoint URL empty. Signing out then ends the WordPress
+session only, and the person stays signed in at nobleid.org.
+
+NobleID's [end-session endpoint](../logout.md) does not work with this
+plugin. On sign-out the plugin sends WordPress's own "logged out" address as
+`post_logout_redirect_uri`, and WordPress puts the user's language in it:
+`https://your-site.example/wp-login.php?loggedout=true&wp_lang=en_US`. The
+address changes with each user's language, NobleID accepts only an exact
+match with a registered sign-out return URL, and so NobleID refuses the
+request ("This return address is not registered for the app") and sends the
+person nowhere.
 
 ## 3. Linking existing WordPress users
 
@@ -102,13 +116,15 @@ existing username.
   `scope` on the code exchange, as the local mock does.
 - It does not check the `iss` response parameter (RFC 9207). It checks the ID
   token's `iss` against the Issuer field.
-- Logout signs the person out of WordPress only. NobleID has no end-session
-  endpoint and the plugin does not revoke the token; access tokens expire
-  after 15 minutes.
+- Logout signs the person out of WordPress only, with End Session left empty
+  (see [Sign-out](#sign-out)). The plugin does not revoke the token; access
+  tokens expire after 15 minutes.
 
 Sources: plugin source (version 3.11.3, `includes/openid-connect-generic-client.php`,
+`includes/openid-connect-generic-client-wrapper.php` (`get_end_session_logout_redirect_url`),
 `includes/openid-connect-generic-jwt-validator.php`,
-`includes/openid-connect-generic-settings-page.php`), https://wordpress.org/plugins/daggerhart-openid-connect-generic/
+`includes/openid-connect-generic-settings-page.php`), WordPress `wp-login.php`
+(the `logout` action adds `wp_lang`), https://wordpress.org/plugins/daggerhart-openid-connect-generic/
 
 ## Profile fields
 

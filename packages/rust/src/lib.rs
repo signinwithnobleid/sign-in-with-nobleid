@@ -1094,8 +1094,9 @@ impl NobleId {
     }
 
     /// Revoke a token (RFC 7009). Revoking the refresh token also ends the
-    /// access tokens issued from it. NobleID has no end-session endpoint: to sign
-    /// out, revoke the refresh token (and the access token), then clear your session.
+    /// access tokens issued from it. To sign out, revoke the refresh token (and the
+    /// access token), then clear your session; ending the NobleID session too is
+    /// optional (the discovered `end_session_endpoint`, docs/logout.md).
     ///
     /// This one request is made here rather than by `oauth2`, whose revocation
     /// helper refuses any non-https endpoint (which rules out a localhost mock).

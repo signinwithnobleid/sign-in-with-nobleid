@@ -62,7 +62,7 @@ if let Some(rt) = &signin.tokens.refresh_token {
     let r = nobleid.refresh(rt, Some(sub)).await?;
 }
 
-// Logout: there is no end-session endpoint. Revoke, then clear your session.
+// Logout: revoke, then clear your session (ending the NobleID session too is optional: docs/logout.md).
 nobleid.revoke(refresh_token.secret(), TokenTypeHint::RefreshToken).await?;
 nobleid.revoke(access_token.secret(), TokenTypeHint::AccessToken).await?;
 ```

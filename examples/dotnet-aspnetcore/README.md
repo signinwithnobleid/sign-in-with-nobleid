@@ -54,7 +54,7 @@ The handler's defaults do not all fit NobleID. In `Program.cs`:
 | `OnMessageReceived` checks `iss` | The handler does not check the RFC 9207 `iss` parameter. The event checks that the sign-in was started by this browser, then that `iss` equals the issuer (missing = rejected), before the handler looks at `error` or `code`. |
 | `OnUserInformationReceived` keeps the raw JSON | The default claim actions drop userinfo-only claims such as `affiliations` and `works_count`. |
 | `MapInboundClaims = false` | Keeps `sub`, `email`, ... under their own names. Key accounts on `sub`; link by `email` only when `email_verified` is true. |
-| No sign-out from the OIDC scheme | NobleID has no end-session endpoint. Logout revokes the tokens and signs out of the cookie scheme only. |
+| No sign-out from the OIDC scheme | Logout revokes the tokens and signs out of the cookie scheme only. Ending the NobleID session too is optional: [docs/logout.md](../../docs/logout.md). |
 | Correlation and nonce cookies `SameSite=Lax` | They must come back on the top-level redirect from NobleID. |
 | `redirect_uri` and `Secure` from `REDIRECT_URI` | The handler would build `redirect_uri` from the request's scheme and Host, which a client or proxy can change. The example sends `REDIRECT_URI` as is and marks every cookie `Secure` unless `REDIRECT_URI` is `http://localhost`. |
 
