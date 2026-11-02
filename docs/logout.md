@@ -67,10 +67,10 @@ ask the person first.
 
 The person stays signed in to NobleID. The next "Sign in with NobleID" may
 complete without a screen if they already approved your app. To require a
-fresh NobleID sign-in, send `prompt=login` and check the ID token's
-`auth_time`: reject it, and ask the person to sign in again, if it is older
-than you accept. (`prompt=login` does not re-prompt someone who signed in
-moments ago, and `max_age=0` does not force a sign-in yet.)
+fresh NobleID sign-in, send `max_age=0`: NobleID asks the person to sign in
+again, and the ID token's `auth_time` is the time they did. (`prompt=login`
+also asks, unless they signed in within the last 2 minutes.) Check
+`auth_time` as described in [tokens](tokens.md#prompt-and-max_age).
 
 ## When NobleID ends the session for you
 

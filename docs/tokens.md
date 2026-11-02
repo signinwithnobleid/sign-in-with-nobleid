@@ -62,8 +62,9 @@ Your OIDC library should do all of this; make sure it is configured to.
 4. `exp` is in the future (allow a small clock skew); `iat` is not in the future.
 5. `nonce` equals the one you sent, if you sent one. NobleID includes it in
    the ID token from sign-in. Send one.
-6. Optional: `auth_time` against your `max_age`; `amr` contains `"otp"` if
-   you require a second factor.
+6. Optional: `auth_time` against your `max_age` (see
+   [prompt and max_age](#prompt-and-max_age) for the clock-skew catch);
+   `amr` contains `"otp"` if you require a second factor.
 
 ID tokens issued on refresh omit `auth_time`, `nonce` and `amr`. Do not
 require a nonce on them.
@@ -126,10 +127,22 @@ one of your own live tokens.
 | Value | Effect |
 |---|---|
 | `prompt=none` | No screens. Redirects with `login_required` or `consent_required` if a screen would be needed. Cannot be combined with `login` or `consent`. |
-| `prompt=login` | Asks for a fresh NobleID sign-in, unless the person signed in moments ago. To require a recent sign-in, also check the ID token's `auth_time` and reject it if it is older than you accept. |
+| `prompt=login` | Asks for a fresh NobleID sign-in, unless the person signed in within the last 2 minutes. To always ask, send `max_age=0`. |
 | `prompt=consent` | Shows the consent screen even if a grant exists. |
 | `prompt=select_account` | Accepted; no effect. |
-| `max_age=<seconds>` | Forces a fresh sign-in if the last one is older. Do not rely on `max_age=0` yet: send `prompt=login` and check `auth_time` instead. |
+| `max_age=<seconds>` | If the person's last NobleID sign-in is older than this, NobleID asks them to sign in again, within the same request, and then continues. `max_age=0` always asks. |
+
+After a fresh sign-in, the ID token's `auth_time` is the time of that
+sign-in.
+
+**Checking `auth_time` against a short `max_age`.** Libraries reject the ID
+token when `auth_time + max_age` is earlier than now, minus a small clock
+allowance: 30 seconds in openid-client (and the kit's Node helper), 60
+seconds in the kit's PHP helper. Signing in and approving the consent screen
+take time, so with `max_age=0` someone who spends longer than that allowance
+on the consent screen is refused by your own check. Either compare
+`auth_time` with the time you sent the request (it must not be earlier,
+allowing for clock skew), or use a `max_age` of a few minutes.
 
 A returning person who already granted your app the requested scopes is
 signed in without a screen, except for public clients redirecting to a
