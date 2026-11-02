@@ -1,17 +1,19 @@
 # Discourse
 
-Written for current Discourse (checked against the `main` branch, October 2026),
-where the official OpenID Connect plugin (`discourse-openid-connect`) is
-bundled with core. Before July 2025 it was a separate plugin, and some settings
-below (`openid connect email verified claim fallback`, `openid connect email
-claim`, the logout extras) were added after the split. On older sites, update
+Written for Discourse 2026.10 or later (checked against the `main` branch,
+October 2026). The official OpenID Connect plugin (`discourse-openid-connect`)
+has been bundled with core since July 2025. Some settings below (`openid
+connect email verified claim fallback`, `openid connect email claim`, the
+logout extras) were added later. The first two ship in 2026.10; before that,
+a missing `email_verified` counted as verified. On older sites, update
 Discourse first.
 
 **Tested?** Documented from the platform's documentation and source code; not run.
 
 ## Settings
 
-**Admin → Settings**, filter on `openid connect`:
+**Admin → Login & authentication → OIDC**. Searching all site settings for
+`openid connect` finds them too.
 
 | Setting | Value |
 |---|---|
@@ -73,7 +75,7 @@ only. The user stays signed in at nobleid.org.
 
 | NobleID claim | Discourse field | Scope |
 |---|---|---|
-| `name` | Name | `profile` |
+| `given_name` and `family_name` (or `name` when both are missing) | Name | `profile` |
 | `preferred_username` | Username (suggested) | `profile` |
 | `email` | Email | `email` |
 | `picture` | Avatar | `profile` |

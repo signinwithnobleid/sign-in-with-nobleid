@@ -1,7 +1,9 @@
 # JupyterHub
 
-Written for JupyterHub 6.0.1 with `oauthenticator` 17.4.0
+Written for JupyterHub 6.1 (6.1.0 checked) with `oauthenticator` 17.4.0
 (`GenericOAuthenticator`). PKCE is in `oauthenticator` 17.1 and later.
+JupyterHub 6.1.0 fixed security advisories, including GHSA-93gc-h923-mp36,
+so do not run 6.0.x.
 
 **Tested?** Configuration checked against the local mock. The script
 [`jupyterhub/test_against_mock.py`](jupyterhub/test_against_mock.py) loads
@@ -90,12 +92,25 @@ JupyterHub lowercases usernames.
 
 Anyone can create a NobleID account, so pick one of these:
 
-- `allowed_users`: a set of `sub` values. JupyterHub logs refused sign-ins as
-  `User '<sub>' not allowed.`, which is a way to collect the value.
+- `allowed_users`: a set of `sub` values. JupyterHub 6.1 logs refused
+  sign-ins as `User '<sub>' not allowed.`, which is a way to collect the
+  value.
 - `allow_existing_users = True`: manage access from `/hub/admin`.
 - `allow_all = True`: any NobleID account. Only for a deliberately open hub.
 
-With none of these set, nobody can sign in.
+With none of these set, only the people in `admin_users` can sign in.
+
+### `enable_auth_state`
+
+Needed to keep `auth_state` (the userinfo response, for `orcid` or a
+spawner). It also needs the `JUPYTERHUB_CRYPT_KEY` environment variable: the
+hub does not start without it.
+
+With auth state on, JupyterHub re-checks each user every `auth_refresh_age`
+(300 seconds by default) by calling userinfo with the stored access token.
+NobleID access tokens last 15 minutes. Without a refresh token the check then
+fails, and the person must sign in again. Add `offline_access` to `scope`
+(below), or set `c.Authenticator.auth_refresh_age = 0`.
 
 ### Refresh tokens
 

@@ -1,2 +1,2 @@
-jupyterhub==6.0.1
+jupyterhub==6.1.0
 oauthenticator==17.4.0

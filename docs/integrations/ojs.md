@@ -17,8 +17,8 @@ certificate error. The released plugin also sends no `state`, `nonce` or PKCE.
 Use one of these two routes:
 
 1. **Broker through Keycloak.** This works today. See below.
-2. **Connect directly** once PKP releases the plugin's development branch. See
-   the last section.
+2. **Connect directly** once a PKP release includes the plugin's `main`
+   branch. See the last section.
 
 ## Route 1: Keycloak between OJS and NobleID
 
@@ -34,7 +34,15 @@ OJS, which the plugin accepts.
      off.
    - **Valid redirect URIs**: the redirect URL that the OJS plugin settings
      page shows for the custom provider (step 4). Usually
-     `https://journal.example.org/index.php/index/openid/doAuthentication?provider=custom`.
+     `https://journal.example.org/index.php/index/openid/doAuthentication?provider=custom`
+     when the plugin is enabled site-wide. For a single journal, `index` is
+     the journal's path instead.
+   - **Valid post logout redirect URIs**: the journal's home page, for
+     example `https://journal.example.org/index.php/<journal-path>/index`
+     (`https://journal.example.org/index.php/index` when the plugin is
+     enabled site-wide). On sign-out the plugin sends people to Keycloak with
+     that return address, and Keycloak refuses one it does not list. The
+     Keycloak server log names a refused address.
    - Copy the client secret from the **Credentials** tab.
 3. Send users straight to NobleID instead of Keycloak's login form:
    **Authentication → browser → Identity Provider Redirector ⚙️ → Default
@@ -44,20 +52,20 @@ OJS, which the plugin accepts.
    Browser Flow**.
 4. In OJS: **Settings → Website → Plugins → Installed Plugins → Generic Plugins → OpenID
    Authentication Plugin → Settings**. Tick **Custom OpenID Provider** and
-   fill in:
+   fill in the fields. OJS labels them with these sentences:
 
-   | Field | Value |
+   | Field (as OJS shows it) | Value |
    |---|---|
-   | OpenID Provider URL | `https://sso.example.org/realms/<realm>/.well-known/openid-configuration` |
-   | Client identifier | the Keycloak client ID from step 2 |
-   | Client secret | the Keycloak client secret from step 2 |
-   | Custom login button settings | label `Sign in with NobleID` |
+   | "Please enter the configuration URL of your OpenID provider." | `https://sso.example.org/realms/<realm>/.well-known/openid-configuration` |
+   | "Please enter your clientId." | the Keycloak client ID from step 2 |
+   | "Please enter your client secret." | the Keycloak client secret from step 2 |
+   | **Custom login button settings**: "Please enter the label of the login button." | `Sign in with NobleID` |
 
    Copy the redirect URL shown next to the custom provider into the Keycloak
    client (step 2).
-5. Decide on **Legacy Login** (keep OJS passwords working alongside NobleID).
-   Keep it on until at least one administrator account has been linked and
-   tested.
+5. Decide on **Enable legacy login** (keep OJS passwords working alongside
+   NobleID). Keep it on until at least one administrator account has been
+   linked and tested.
 
 What OJS receives: `given_name`, `family_name` and `email` as Keycloak passes
 them through from NobleID. OJS links its accounts to Keycloak's `sub`, and
@@ -72,22 +80,24 @@ stays signed in at nobleid.org. That is expected.
 
 The plugin's `main` branch (changes from August–September 2026) reads the
 JWKS with a parser that accepts EC keys, checks `iss`, `aud` and `nonce`, and
-sends `state`, `nonce` and PKCE S256. It is not in any release as of
-19 October 2026, and we have not run it against NobleID or the mock. When a
-release contains it, configure:
+sends `state`, `nonce` and PKCE S256. It is only on `main`, not on any
+stable branch, and is in no release as of 2 November 2026. Which OJS versions
+it will ship for is not known. We have not run it against NobleID or the
+mock. When a release contains it, configure:
 
-| Field | Value |
+| Field (as OJS shows it) | Value |
 |---|---|
-| Custom OpenID Provider | ticked |
-| OpenID Provider URL | `https://id.nobleid.org/.well-known/openid-configuration` |
-| Client identifier | `nbcl_your_client_id` |
-| Client secret | `nbcs_your_client_secret` |
-| Custom login button settings | label `Sign in with NobleID` |
+| **Custom OpenID Provider** | ticked |
+| "Please enter the configuration URL of your OpenID provider." | `https://id.nobleid.org/.well-known/openid-configuration` |
+| "Please enter your clientId." | `nbcl_your_client_id` |
+| "Please enter your client secret." | `nbcs_your_client_secret` |
+| **Custom login button settings**: "Please enter the label of the login button." | `Sign in with NobleID` |
 
 - Register the redirect URL that the settings page shows. Its usual shape is
   `https://journal.example.org/index.php/index/openid/doAuthentication?provider=custom`.
   The `index` segment is the site context, used when the plugin is enabled
-  site-wide. The `?provider=custom` part is part of the URL. Register it too.
+  site-wide. For a single journal it is the journal's path. The
+  `?provider=custom` part is part of the URL. Register it too.
 - The plugin reads the endpoints from discovery, including the authorization
   endpoint on `www.nobleid.org`.
 - The plugin asks for `openid profile email`. It sends the client secret in
