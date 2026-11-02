@@ -23,6 +23,11 @@ before 1.0 a minor version may change the helpers' API.
   guides, READMEs and code comments describe it as optional; no front- or
   back-channel logout. WordPress cannot use it: the plugin's return address
   carries the user's language, so NobleID refuses it.
+- **Fresh sign-in**: `max_age=0` now works on NobleID: the person signs in
+  again within the request, and `auth_time` is that sign-in. `prompt=login`
+  asks unless they signed in in the last 2 minutes. The docs say so, and warn
+  that a library's `auth_time` check with a short `max_age` can refuse
+  someone who was slow on the consent screen.
 - **Mock**: `/oauth/logout` with the provider's checks and messages, and
   `post_logout_redirect_uris` per client. The Node example can end the
   NobleID session (`POST_LOGOUT_REDIRECT_URI`), and its end-to-end test does.
