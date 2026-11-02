@@ -9,12 +9,13 @@
   };
 
   if (document.getElementById("signin")) {
-    var theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "black" : "white";
     NobleID.renderButton("signin", {
       clientId: cfg.clientId,
       redirectUri: cfg.redirectUri,
       scope: cfg.scope,
-      theme: theme,
+      theme: theme, // or "green", "outline-white", "outline-black"
+      shape: "rounded", // or "pill", "square"
       onError: function (e) {
         say("Could not start sign-in: " + e.code);
       },

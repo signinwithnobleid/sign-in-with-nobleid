@@ -7,9 +7,14 @@ TypeScript types included). Example:
 [`examples/node-openid-client`](../../examples/node-openid-client/README.md).
 
 Install it with `npm install nobleid-signin`. Until 0.1.0 appears on npm,
-install it from this repository (`npm install ./packages/node`, or copy
-`index.mjs` and `index.d.ts`). Only a `nobleid-signin` whose npm page links
-back to this repository is ours.
+install it from a clone of this repository with
+`npm install --install-links <path-to-clone>/packages/node` (without
+`--install-links`, npm does not install `openid-client` and the import fails),
+or copy `index.mjs` and `index.d.ts`. Only a `nobleid-signin` whose npm page
+links back to this repository is ours.
+
+To try it without a NobleID account, run the [local mock](../../mock-oidc/README.md#use-it-from-your-own-app)
+and pass `issuer: "http://localhost:9400", allowInsecureLocalhost: true`.
 
 ```js
 import { createNobleIdClient } from "nobleid-signin";

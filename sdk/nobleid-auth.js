@@ -1,5 +1,5 @@
 /**
- * NobleID Sign-In SDK v2.1.1
+ * NobleID Sign-In SDK v2.2.0
  * https://www.nobleid.org/developers/sign-in
  * Licensed under the Apache License, Version 2.0.
  *
@@ -22,9 +22,10 @@
  *        clientId: "nbcl_your_client_id",
  *        redirectUri: "https://app.example/callback",
  *        scope: "openid profile",
- *        theme: "light",                 // "light" | "dark"
- *        size: "md",                     // "sm" | "md" | "lg"  (min height 40px)
- *        label: "Sign in with NobleID",  // or "Continue with NobleID"
+ *        theme: "white",     // "white" | "black" | "green" | "outline-white" | "outline-black"
+ *        shape: "rounded",   // "rounded" | "pill" | "square"
+ *        size: "md",         // "sm" 40px | "md" 44px | "lg" 48px
+ *        label: "sign-in",   // "sign-in" | "continue" | "icon" (the mark alone)
  *      });
  *
  *      // on https://app.example/callback
@@ -54,12 +55,11 @@
   var DEFAULT_ISSUER = "https://id.nobleid.org";
   var DEFAULT_AUTHORIZE_URL = "https://www.nobleid.org/oauth/authorize";
   var MARK_URL = "https://www.nobleid.org/brand/nobleid-mark.svg";
+  var MARK_WHITE_URL = "https://www.nobleid.org/brand/nobleid-mark-white.svg";
   var STORAGE_KEY = "nobleid_oauth";
   var MAX_FLOW_AGE_MS = 10 * 60 * 1000;
   var CLOCK_SKEW_S = 60;
-  var VERSION = "2.1.1";
-
-  var LABELS = ["Sign in with NobleID", "Continue with NobleID"];
+  var VERSION = "2.2.0";
 
   var cfg = {};
   setEndpoints(DEFAULT_ISSUER, DEFAULT_AUTHORIZE_URL);
@@ -430,16 +430,37 @@
 
   /* ───────────── official button ───────────── */
 
+  // Researcher badge colours.
   var THEMES = {
     light: { bg: "#FFFFFF", text: "#101828", border: "#D0D5DD", hover: "#F9FAFB", muted: "#475467", ok: "#027A48" },
     dark: { bg: "#101828", text: "#FFFFFF", border: "#101828", hover: "#1D2939", muted: "#D0D5DD", ok: "#6CE9A6" },
   };
-  var SIZES = {
-    sm: { h: 40, pad: 12, font: 14, mark: 20, gap: 10 },
-    md: { h: 44, pad: 14, font: 15, mark: 22, gap: 10 },
-    lg: { h: 48, pad: 16, font: 16, mark: 24, gap: 12 },
+
+  // The button set. Same names, colours and sizes as the files in brand/buttons/
+  // (nobleid-<label>-<theme>-<shape>-<size>.svg); scripts/button-spec.mjs is
+  // the source and test/brand.test.mjs checks that this copy matches it.
+  var LABELS = { "sign-in": "Sign in with NobleID", "continue": "Continue with NobleID", icon: "Sign in with NobleID" };
+  var LABEL_ALIASES = { "Sign in with NobleID": "sign-in", "Continue with NobleID": "continue" }; // 2.1 took the wording
+  var BUTTON_THEMES = {
+    white: { bg: "#FFFFFF", border: "#D0D5DD", text: "#101828", mark: "green", hover: "#F9FAFB" },
+    black: { bg: "#101828", border: "#101828", text: "#FFFFFF", mark: "white", hover: "#1D2939" },
+    green: { bg: "#00734D", border: "#00734D", text: "#FFFFFF", mark: "white", hover: "#004D33" },
+    "outline-white": { bg: "transparent", border: "#FFFFFF", text: "#FFFFFF", mark: "white", hover: "rgba(255,255,255,0.12)" },
+    "outline-black": { bg: "transparent", border: "#101828", text: "#101828", mark: "green", hover: "rgba(16,24,40,0.06)" },
   };
+  var THEME_ALIASES = { light: "white", dark: "black" }; // 2.1 names
+  var SHAPES = { rounded: 8, pill: "full", square: 0 };
+  var SIZES = {
+    sm: { h: 40, mark: 20, font: 14, pad: 12, gap: 10 },
+    md: { h: 44, mark: 22, font: 15, pad: 14, gap: 10 },
+    lg: { h: 48, mark: 24, font: 16, pad: 16, gap: 12 },
+  };
+  var PILL_EXTRA = 4;
   var FONT = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+  function own(obj, key) {
+    return typeof key === "string" && Object.prototype.hasOwnProperty.call(obj, key);
+  }
 
   /** Same-site path or https URL (http only for localhost); no whitespace, control characters or backslashes. */
   function isSafeHref(url) {
@@ -453,18 +474,27 @@
    * Create the official "Sign in with NobleID" button element.
    * With `loginUrl` it is a link to your server's sign-in route (confidential
    * client); otherwise it runs signIn(opts) as a public client.
+   * theme, shape, size and label take the names used in the brand/buttons/
+   * file names; unknown values fall back to white, rounded, md and sign-in.
    *
    * @param {{loginUrl?: string, clientId?: string, redirectUri?: string, scope?: string,
-   *          theme?: "light"|"dark", size?: "sm"|"md"|"lg",
-   *          label?: "Sign in with NobleID"|"Continue with NobleID",
+   *          theme?: "white"|"black"|"green"|"outline-white"|"outline-black"|"light"|"dark",
+   *          shape?: "rounded"|"pill"|"square", size?: "sm"|"md"|"lg",
+   *          label?: "sign-in"|"continue"|"icon"|"Sign in with NobleID"|"Continue with NobleID",
    *          onError?: function(Error): void}} opts
    * @returns {HTMLElement}
    */
   function createButton(opts) {
     opts = opts || {};
-    var theme = THEMES[opts.theme] || THEMES.light;
-    var size = SIZES[opts.size] || SIZES.md;
-    var label = LABELS.indexOf(opts.label) !== -1 ? opts.label : LABELS[0];
+    var themeName = own(THEME_ALIASES, opts.theme) ? THEME_ALIASES[opts.theme] : opts.theme;
+    var theme = own(BUTTON_THEMES, themeName) ? BUTTON_THEMES[themeName] : BUTTON_THEMES.white;
+    var shape = own(SHAPES, opts.shape) ? opts.shape : "rounded";
+    var size = own(SIZES, opts.size) ? SIZES[opts.size] : SIZES.md;
+    var labelKey = own(LABELS, opts.label) ? opts.label : own(LABEL_ALIASES, opts.label) ? LABEL_ALIASES[opts.label] : "sign-in";
+    var label = LABELS[labelKey];
+    var iconOnly = labelKey === "icon";
+    var extra = shape === "pill" ? PILL_EXTRA : 0;
+    var radius = SHAPES[shape] === "full" ? size.h / 2 : SHAPES[shape];
     var useLink = !!opts.loginUrl;
     if (useLink && !isSafeHref(opts.loginUrl)) {
       throw fail("invalid_request", "loginUrl must be a same-site path or an https URL");
@@ -479,19 +509,22 @@
     el.style.cssText = [
       "display:inline-flex",
       "align-items:center",
+      "justify-content:center",
       "gap:" + size.gap + "px",
       "height:" + size.h + "px",
       "min-height:40px",
-      "padding:0 " + (size.pad + 4) + "px 0 " + size.pad + "px",
+      iconOnly ? "width:" + size.h + "px;min-width:40px;padding:0" : "padding:0 " + (size.pad + 4 + extra) + "px 0 " + (size.pad + extra) + "px",
       "box-sizing:border-box",
       "border:1px solid " + theme.border,
-      "border-radius:8px",
+      "border-radius:" + radius + "px",
       "background:" + theme.bg,
       "color:" + theme.text,
       "font:600 " + size.font + "px/1 " + FONT,
       "text-decoration:none",
       "white-space:nowrap",
       "cursor:pointer",
+      // Keep the browser's focus ring, clear of the border.
+      "outline-offset:2px",
     ].join(";");
     el.addEventListener("mouseenter", function () {
       el.style.background = theme.hover;
@@ -501,16 +534,18 @@
     });
 
     var img = doc.createElement("img");
-    img.setAttribute("src", MARK_URL);
+    img.setAttribute("src", theme.mark === "white" ? MARK_WHITE_URL : MARK_URL);
     img.setAttribute("alt", "");
     img.setAttribute("width", String(size.mark));
     img.setAttribute("height", String(size.mark));
     img.style.cssText = "display:block;flex:none";
     el.appendChild(img);
 
-    var span = doc.createElement("span");
-    span.textContent = label;
-    el.appendChild(span);
+    if (!iconOnly) {
+      var span = doc.createElement("span");
+      span.textContent = label;
+      el.appendChild(span);
+    }
 
     if (!useLink) {
       var busy = false;
@@ -706,6 +741,7 @@
           redirectUri: redirectUri,
           scope: n.getAttribute("data-nobleid-scope") || undefined,
           theme: n.getAttribute("data-nobleid-theme") || undefined,
+          shape: n.getAttribute("data-nobleid-shape") || undefined,
           size: n.getAttribute("data-nobleid-size") || undefined,
           label: n.getAttribute("data-nobleid-label") || undefined,
         });

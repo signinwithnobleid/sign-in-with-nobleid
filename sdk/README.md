@@ -1,7 +1,7 @@
 # Browser SDK: `nobleid-auth.js`
 
 The official "Sign in with NobleID" button and a browser-only OpenID Connect
-client. Version 2.1.1. No dependencies, ES5 syntax, about 30 KB unminified (comments included).
+client. Version 2.2.0. No dependencies, ES5 syntax, about 30 KB unminified (comments included).
 
 Hosted at `https://www.nobleid.org/sdk/nobleid-auth.js`, which always serves
 the latest release. A script you load from another site runs with full
@@ -17,14 +17,14 @@ the server (see the [Node](../examples/node-openid-client/),
 draws the button, as a link to your own route:
 
 ```html
-<div data-nobleid-login-url="/auth/nobleid/start" data-nobleid-theme="light"></div>
+<div data-nobleid-login-url="/auth/nobleid/start" data-nobleid-theme="white"></div>
 <script src="https://www.nobleid.org/sdk/nobleid-auth.js" async></script>
 ```
 
 or
 
 ```js
-NobleID.renderButton("signin", { loginUrl: "/auth/nobleid/start", theme: "dark" });
+NobleID.renderButton("signin", { loginUrl: "/auth/nobleid/start", theme: "black", shape: "pill" });
 ```
 
 `loginUrl` must be a same-site path (`/…`) or an `https://` URL. Anything
@@ -41,9 +41,10 @@ NobleID.renderButton("signin", {
   clientId: "nbcl_your_client_id",
   redirectUri: "https://app.example/callback",
   scope: "openid profile",
-  theme: "light",
+  theme: "white",
+  shape: "rounded",
   size: "md",
-  label: "Sign in with NobleID",
+  label: "sign-in",
   onError: function (e) { console.warn(e.code); },
 });
 
@@ -93,7 +94,7 @@ NobleID.revoke({ clientId: "nbcl_your_client_id", token: r.tokens.access_token, 
 
 Data attributes for auto-rendering: `data-nobleid-login-url`,
 `data-nobleid-client-id`, `data-nobleid-redirect-uri`, `data-nobleid-scope`,
-`data-nobleid-theme`, `data-nobleid-size`, `data-nobleid-label`.
+`data-nobleid-theme`, `data-nobleid-shape`, `data-nobleid-size`, `data-nobleid-label`.
 From data attributes, `data-nobleid-login-url` and `data-nobleid-redirect-uri`
 must be on the page's own origin (HTML sanitisers usually keep `data-*`, so
 markup your visitors write could carry them). To link to another origin, call
@@ -101,13 +102,28 @@ markup your visitors write could carry them). To link to another origin, call
 
 ## Button rules
 
-- Labels: **Sign in with NobleID** or **Continue with NobleID** only (any
-  other `label` falls back to the first).
-- Themes `light` and `dark`; sizes `sm` (40 px), `md` (44 px), `lg` (48 px).
-  Minimum height 40 px.
-- The mark loads from `https://www.nobleid.org/brand/nobleid-mark.svg`; allow
-  that in your CSP `img-src`, or use the SVGs in [`brand/`](../brand/).
-- Full guide: [docs/brand.md](../docs/brand.md).
+The options use the same names as the files in [`brand/buttons/`](../brand/buttons/),
+`nobleid-<label>-<theme>-<shape>-<size>.svg`, so the SDK button and the
+image look alike:
+
+| Option | Values (default first) |
+|---|---|
+| `label` | `sign-in` ("Sign in with NobleID"), `continue` ("Continue with NobleID"), `icon` (the mark alone; its accessible name is "Sign in with NobleID") |
+| `theme` | `white`, `black`, `green`, `outline-white`, `outline-black` |
+| `shape` | `rounded` (8 px corners), `pill`, `square` |
+| `size` | `md` (44 px), `sm` (40 px), `lg` (48 px) |
+
+- An unknown value falls back to the default, so no other wording can appear.
+  The 2.1 values still work: `theme: "light"` is `white`, `"dark"` is
+  `black`, and the full label wordings are accepted.
+- Minimum height 40 px. The browser's focus ring is kept, 2 px clear of the
+  button.
+- The mark loads from `https://www.nobleid.org/brand/nobleid-mark.svg`, or
+  `nobleid-mark-white.svg` on the black, green and outline-white themes;
+  allow `https://www.nobleid.org` in your CSP `img-src`, or use the SVGs in
+  [`brand/`](../brand/).
+- Which theme on which background, clear space and contrast:
+  [docs/brand.md](../docs/brand.md).
 
 ## Researcher badge
 
@@ -136,9 +152,32 @@ connect-src https://id.nobleid.org;
 
 ## Testing
 
-`NobleID.configure({ issuer: "http://localhost:9400", authorizationEndpoint: "http://127.0.0.1:9400/oauth/authorize" })`
-points the SDK at the [local mock](../mock-oidc/). The issuer must be
-`https`, except for `localhost`. Tests: `node --test test/sdk.test.mjs`.
+To try the SDK without a NobleID account, run the [local mock](../mock-oidc/)
+and point the SDK at it **on both pages**, the one with the button and the
+callback page, before anything else runs:
+
+```html
+<script src="nobleid-auth.js"></script>
+<script>
+  NobleID.configure({ issuer: "http://localhost:9400", authorizationEndpoint: "http://127.0.0.1:9400/oauth/authorize" });
+</script>
+```
+
+Use the mock's public test client `nbcl_mockpublic00000000000000`; its
+redirect URI `http://localhost/callback.html` accepts any port. Without the
+call on the callback page, `handleCallback` fails with `invalid_issuer`.
+The issuer must be `https`, except for `localhost`. Remove the call before
+you go live. Tests: `node --test test/sdk.test.mjs`.
+
+## Changes in 2.2.0
+
+- The button comes in every label, theme, shape and size of the button files:
+  new `shape` option (`rounded`, `pill`, `square`) and `data-nobleid-shape`;
+  new themes `black`, `green`, `outline-white`, `outline-black`; `label: "icon"`
+  for the mark alone; option values are the file-name words (`sign-in`,
+  `continue`). 2.1 values keep working.
+- The black theme (2.1's `dark`) shows the white mark, as the black files do.
+- The button keeps the browser's focus ring 2 px clear of its border.
 
 ## Changes in 2.1.1
 

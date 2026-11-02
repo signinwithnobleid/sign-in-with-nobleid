@@ -20,7 +20,7 @@ const only = onlyIdx >= 0 ? args[onlyIdx + 1].split(",") : null;
 const summary = [];
 let failed = 0;
 
-const suites = ["test/mock.test.mjs", "test/sdk.test.mjs", "test/html-sdk.test.mjs", "test/wordpress.test.mjs", "test/profile.test.mjs"];
+const suites = ["test/mock.test.mjs", "test/sdk.test.mjs", "test/brand.test.mjs", "test/html-sdk.test.mjs", "test/wordpress.test.mjs", "test/profile.test.mjs"];
 const unit = spawnSync(process.execPath, ["--test", "--test-reporter=spec", ...suites], { cwd: ROOT, stdio: "inherit" });
 summary.push(`node test suites (${suites.length} files): ${unit.status === 0 ? "passed" : "FAILED"}`);
 if (unit.status !== 0) failed++;

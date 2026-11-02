@@ -45,7 +45,10 @@ notes from NobleID's own testing.
 
 ## Testing locally
 
-Run your integration against the [local mock](../mock-oidc/README.md). Its
+Run your integration against the [local mock](../mock-oidc/README.md):
+[the settings for your app](../mock-oidc/README.md#use-it-from-your-own-app)
+are its issuer, a test client and a `localhost` redirect URI. Many libraries
+refuse an `http` issuer by default; allow it for `localhost` only. Its
 `/__mock/next-authorize` control can deny consent, send a wrong or missing
 `iss`, a wrong `nonce` or `aud`, or untick scopes, so you can check your
 error handling.

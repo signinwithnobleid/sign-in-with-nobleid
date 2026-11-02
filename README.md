@@ -34,6 +34,9 @@ badged them as a researcher, and which works they registered. See
    <div data-nobleid-login-url="/login"></div>
    <script src="https://www.nobleid.org/sdk/nobleid-auth.js" async></script>
    ```
+   Or an image link. Every label, theme (white, black, green, outline),
+   shape (rounded, pill, square) and size is in [`brand/buttons/`](brand/buttons/);
+   pick one and copy its code at https://www.nobleid.org/sign-in-with-nobleid#buttons.
    A script loaded from another site can do anything on your page, and this
    URL always serves the latest release. On pages with anything to protect,
    serve a reviewed copy of [`sdk/nobleid-auth.js`](sdk/) from your own site.
@@ -50,7 +53,7 @@ badged them as a researcher, and which works they registered. See
 
 | Path | What |
 |---|---|
-| [`sdk/`](sdk/README.md) | Browser SDK v2.1.1: button, public-client flow, researcher badge |
+| [`sdk/`](sdk/README.md) | Browser SDK v2.2.0: button, public-client flow, researcher badge |
 | [`packages/node`](packages/node/README.md) | Node/TypeScript helper (openid-client v6) |
 | [`packages/python`](packages/python/README.md) | Python helper (Authlib) |
 | [`packages/rust`](packages/rust/README.md) | Rust helper (openidconnect) |
@@ -59,7 +62,7 @@ badged them as a researcher, and which works they registered. See
 | [`examples/`](#examples) | Working apps, all tested end to end against the mock |
 | [`mock-oidc/`](mock-oidc/README.md) | Local mock of the provider (Node, no dependencies) |
 | [`docs/`](docs/index.md) | Guides and reference ([GUIDE.md](GUIDE.md) is the table of contents) |
-| [`brand/`](brand/) | Button and mark SVGs; [brand guide](docs/brand.md) |
+| [`brand/`](brand/) | The button in every label, theme, shape and size, and the mark; [brand guide](docs/brand.md) |
 
 ## Examples
 
