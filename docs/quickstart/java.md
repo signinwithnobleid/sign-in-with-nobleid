@@ -29,4 +29,4 @@ Spring needs, in code (see the example):
   a filter on the callback that checks state, then `iss`.
 - `OidcUserService.setRetrieveUserInfo(r -> true)` to always call userinfo.
 - Revocation and forced refresh: done with `RestClient`; Spring has no
-  revocation client. Do not configure RP-initiated logout.
+  revocation client. RP-initiated logout is optional; see [logout](../logout.md).

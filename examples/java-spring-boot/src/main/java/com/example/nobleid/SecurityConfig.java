@@ -66,7 +66,7 @@ class SecurityConfig {
         OidcUserService userService = new OidcUserService();
         userService.setRetrieveUserInfo(request -> true);
 
-        // Logout: NobleID has no end-session endpoint. Revoke the refresh token (which ends its
+        // Logout (local; NobleID's end-session endpoint is optional). Revoke the refresh token (which ends its
         // access tokens) and the access token, then Spring clears the session.
         LogoutHandler revoke = (req, res, auth) -> {
             if (!(auth instanceof OAuth2AuthenticationToken)) return;

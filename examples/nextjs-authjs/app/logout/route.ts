@@ -4,8 +4,8 @@ import { appOrigin, checkPost, readToken } from "@/lib/session";
 
 /**
  * Sign out: events.signOut (auth.ts) revokes the refresh and access tokens at
- * NobleID, then Auth.js clears the session cookie. NobleID has no end-session
- * endpoint, so there is no redirect to the provider.
+ * NobleID, then Auth.js clears the session cookie. Sign-out stays local: no
+ * redirect to NobleID's (optional) end-session endpoint; see docs/logout.md.
  */
 export async function POST(req: NextRequest) {
   const token = await readToken();

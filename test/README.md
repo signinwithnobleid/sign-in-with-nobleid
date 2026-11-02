@@ -52,6 +52,7 @@ The example receives `ISSUER`, `CLIENT_ID`, `CLIENT_SECRET`, `REDIRECT_URI`,
 | `GET /works` | `<pre id="works">` with the JSON from `/oauth/works`. |
 | `POST /refresh` | Refresh-token grant; stores the rotated refresh token. |
 | `POST /logout` | Revokes the refresh token (and access token), clears the session. |
+| `GET /signed-out` | Only with `"profile": { "endSession": true }` in `e2e.json`: after `POST /logout` the app sends the browser to the mock's end-session endpoint (`POST_LOGOUT_REDIRECT_URI` is set to this route and registered with the mock); this route checks `state` and shows `id="signed-out"`. |
 
 POST forms may carry hidden CSRF inputs; the driver submits every hidden input
 of the form and sends a same-origin `Origin` header.

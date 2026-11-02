@@ -20,7 +20,10 @@
 | `403 insufficient_scope` | userinfo without `openid`, or works without `works` | Request the scope. |
 | `429 slow_down` | Rate limited | Back off; honour `Retry-After`. |
 | The person is signed straight back in after logout | They are still signed in to NobleID and already approved your app | Expected. To require a fresh sign-in, send `prompt=login` and check `auth_time` in the ID token. |
-| Library wants an `end_session_endpoint` | There is none | Leave it empty; revoke tokens and clear your session. |
+| Library wants an `end_session_endpoint` | It is `https://www.nobleid.org/oauth/logout` (in discovery) | Use it only if sign-out should end the NobleID session too, and register your return URL as a sign-out return URL. See [logout](logout.md). |
+| Sign-out shows "This return address is not registered for the app" | `post_logout_redirect_uri` is not exactly one of the app's sign-out return URLs (query string included; no port leeway on `localhost`) | Add it, exactly, under Dashboard → OAuth apps → Sign-out return URLs. |
+| The same, from WordPress, for some users only | The plugin's return address carries the user's language (`wp-login.php?loggedout=true&wp_lang=…`), so it differs per user | Leave the plugin's End Session Endpoint URL empty. See [integrations/wordpress.md](integrations/wordpress.md#sign-out). |
+| Sign-out shows "A return address needs the app to be identified" | `post_logout_redirect_uri` sent with neither `id_token_hint` nor `client_id` | Send the ID token from sign-in as `id_token_hint`, or at least `client_id`. |
 
 ## Library settings
 
@@ -37,11 +40,11 @@ notes from NobleID's own testing.
 | **go-oidc v3 + x/oauth2** (Go) | `SupportedSigningAlgs: []string{oidc.ES256}`. Set `Endpoint.AuthStyle` explicitly. Neither checks `iss` nor (go-oidc) `nonce`. x/oauth2 has no revocation. |
 | **league/oauth2-client** (PHP) | `scopeSeparator => ' '` (space-separated scopes), `pkceMethod => 'S256'`, `approval_prompt => null`. Its HTTP Basic provider does not form-urlencode the credentials. No ID token handling: verify with `firebase/php-jwt` (ES256 keys only) and check `iss`, `aud`, `nonce` yourself. |
 | **jumbojett/openid-connect-php** | Cannot verify ES256 ID tokens (1.0.2). Not usable with NobleID. |
-| **Spring Security** (6.5) | ES256 via `OidcIdTokenDecoderFactory.setJwsAlgorithmResolver(r -> SignatureAlgorithm.ES256)`. PKCE for confidential clients via `OAuth2AuthorizationRequestCustomizers.withPkce()`. Does not check `iss` (add a filter). `OidcUserService.setRetrieveUserInfo(r -> true)`. No revocation client. Do not configure RP-initiated logout. |
+| **Spring Security** (6.5) | ES256 via `OidcIdTokenDecoderFactory.setJwsAlgorithmResolver(r -> SignatureAlgorithm.ES256)`. PKCE for confidential clients via `OAuth2AuthorizationRequestCustomizers.withPkce()`. Does not check `iss` (add a filter). `OidcUserService.setRetrieveUserInfo(r -> true)`. No revocation client. RP-initiated logout (`OidcClientInitiatedLogoutSuccessHandler`) is optional; register its post-logout address as a sign-out return URL. |
 | **omniauth_openid_connect 0.8** (Ruby) | `client_signing_alg: :ES256`, `pkce: true`, `send_nonce: true`, `client_auth_method: :basic`, `send_scope_to_token_endpoint: false`, explicit `callback_path`. **Takes `nonce` and `code_verifier` from callback parameters**, does not check `iss`, surfaces `error` before `state`, does not compare the userinfo `sub`: use the example's strategy subclass. Never enable `OpenIDConnect.debug!` / `Rack::OAuth2.debug!` (they log tokens). |
 | **ASP.NET Core OpenIdConnect** (.NET 10) | `ResponseMode = Query` (default is `form_post`), `UsePkce = true`, `TokenValidationParameters.ValidAlgorithms = ["ES256"]`, `MapInboundClaims = false`. Uses PAR automatically on .NET 9+ when discovery lists it. Does not check `iss`. Userinfo-only claims are dropped by default claim actions. |
 | **Keycloak** (identity brokering) | PKCE S256 on, client secret sent as Basic, validate signatures with the JWKS URL, ES256. Declare `nobleid`, `orcid` and other attributes in the realm's user profile or Keycloak drops them. See [integrations/keycloak.md](integrations/keycloak.md). |
-| **WordPress OpenID Connect Generic Client** (3.11.3 or later) | Set the Issuer and JWKS URI fields; leave End Session empty. See [integrations/wordpress.md](integrations/wordpress.md). |
+| **WordPress OpenID Connect Generic Client** (3.11.3 or later) | Set the Issuer and JWKS URI fields. Leave End Session empty, and clear it after a discovery import: the plugin's sign-out return address changes with the user's language, so NobleID refuses it. See [integrations/wordpress.md](integrations/wordpress.md). |
 
 ## Testing locally
 

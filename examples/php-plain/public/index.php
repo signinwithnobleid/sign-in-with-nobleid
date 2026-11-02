@@ -192,7 +192,7 @@ try {
             go('/');
         }
 
-        // Logout: NobleID has no end-session endpoint. Revoke, then clear our session.
+        // Logout (local): revoke, then clear our session. Ending the NobleID session is optional (docs/logout.md).
         $tokens = $_SESSION['tokens'] ?? null;
         if (is_array($tokens)) {
             foreach (['refresh_token', 'access_token'] as $hint) {

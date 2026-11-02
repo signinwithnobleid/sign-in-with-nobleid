@@ -86,7 +86,7 @@ function decode(jwt) {
 
 /* ── discovery & keys ── */
 
-test("discovery: issuer, authorize on another host, ES256 only, S256 only, query only, no end_session", () => {
+test("discovery: issuer, authorize and end session on another host, ES256 only, S256 only, query only", () => {
   assert.equal(meta.issuer, base);
   assert.notEqual(new URL(meta.authorization_endpoint).host, new URL(base).host);
   assert.deepEqual(meta.id_token_signing_alg_values_supported, ["ES256"]);
@@ -94,7 +94,9 @@ test("discovery: issuer, authorize on another host, ES256 only, S256 only, query
   assert.deepEqual(meta.response_types_supported, ["code"]);
   assert.deepEqual(meta.response_modes_supported, ["query"]);
   assert.equal(meta.authorization_response_iss_parameter_supported, true);
-  for (const k of ["end_session_endpoint", "registration_endpoint", "acr_values_supported", "dpop_signing_alg_values_supported"]) assert.ok(!(k in meta), k);
+  assert.equal(new URL(meta.end_session_endpoint).host, new URL(meta.authorization_endpoint).host);
+  assert.equal(new URL(meta.end_session_endpoint).pathname, "/oauth/logout");
+  for (const k of ["registration_endpoint", "acr_values_supported", "dpop_signing_alg_values_supported", "frontchannel_logout_supported", "backchannel_logout_supported"]) assert.ok(!(k in meta), k);
   for (const k of ["profile_complete", "verification_level", "affiliation"]) assert.ok(meta.claims_supported.includes(k), k);
   assert.ok(!meta.claims_supported.includes("verified"), "the proposed `verified` array was dropped");
 });
@@ -469,4 +471,84 @@ test("authorize: a repeated parameter uses the first value, as on the provider",
   assert.equal(loc.origin + loc.pathname, RU);
   assert.deepEqual(loc.searchParams.getAll("state"), ["first"]);
   assert.ok(loc.searchParams.get("code"));
+});
+
+/* ── end session (RP-Initiated Logout 1.0) ── */
+
+const SIGNED_OUT = CONF.post_logout_redirect_uris[0];
+
+async function endSession(params, { post = false } = {}) {
+  const u = new URL(meta.end_session_endpoint);
+  const body = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined));
+  const r = post
+    ? await fetch(u, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body, redirect: "manual" })
+    : await fetch(u + "?" + body, { redirect: "manual" });
+  return { status: r.status, location: r.headers.get("location"), text: await r.text() };
+}
+
+async function idTokenFor(client = CONF) {
+  const c = await codeFor({ client });
+  const t = await exchange(c, { client });
+  assert.equal(t.status, 200);
+  return t.body.id_token;
+}
+
+test("end session: a registered return URL gets state back; GET and form POST", async () => {
+  const hint = await idTokenFor();
+  for (const post of [false, true]) {
+    const r = await endSession({ id_token_hint: hint, post_logout_redirect_uri: SIGNED_OUT, state: "st 1&2" }, { post });
+    assert.equal(r.status, 302, r.text);
+    assert.equal(r.location, SIGNED_OUT + "?state=st%201%262");
+  }
+  const st = await (await fetch(base + "/__mock/state")).json();
+  assert.equal(st.lastEndSession.id_token_hint, "(present)", "the hint itself is never echoed");
+  // client_id alone identifies the app; no state, no query added.
+  assert.equal((await endSession({ client_id: CONF.client_id, post_logout_redirect_uri: SIGNED_OUT })).location, SIGNED_OUT);
+});
+
+test("end session: nothing to return to shows a signed-out page", async () => {
+  const r = await endSession({ id_token_hint: await idTokenFor() });
+  assert.equal(r.status, 200);
+  assert.match(r.text, /id="signed-out"/);
+  assert.equal((await endSession({})).status, 200);
+});
+
+test("end session: refusals are shown, never redirected", async () => {
+  const hint = await idTokenFor();
+  const [h, p] = hint.split(".");
+  const forged = h + "." + p + "." + b64u(crypto.randomBytes(64));
+  const otherIss = (() => {
+    const key = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" }).privateKey;
+    const head = b64u(JSON.stringify({ alg: "ES256", typ: "JWT", kid: decode(hint).header.kid }));
+    const body = b64u(JSON.stringify({ ...decode(hint).payload, iss: "https://evil.example" }));
+    return head + "." + body + "." + b64u(crypto.sign("sha256", Buffer.from(head + "." + body), { key, dsaEncoding: "ieee-p1363" }));
+  })();
+  const cases = [
+    [{ id_token_hint: hint, post_logout_redirect_uri: "https://evil.example/" }, "not registered"],
+    [{ id_token_hint: hint, post_logout_redirect_uri: SIGNED_OUT + "?x=1" }, "not registered"],
+    [{ id_token_hint: hint, post_logout_redirect_uri: SIGNED_OUT.replace(":3000", ":3001") }, "not registered"],
+    [{ id_token_hint: hint, post_logout_redirect_uri: CONF.redirect_uris[0] }, "not registered"],
+    [{ post_logout_redirect_uri: SIGNED_OUT }, "needs the app to be identified"],
+    [{ id_token_hint: hint, client_id: PUB.client_id, post_logout_redirect_uri: SIGNED_OUT }, "does not match"],
+    [{ id_token_hint: forged, post_logout_redirect_uri: SIGNED_OUT }, "did not issue"],
+    [{ id_token_hint: otherIss, post_logout_redirect_uri: SIGNED_OUT }, "did not issue"],
+    [{ id_token_hint: "a.b.c" }, "did not issue"],
+    [{ client_id: "nbcl_unknown", post_logout_redirect_uri: SIGNED_OUT }, "not registered with NobleID"],
+  ];
+  for (const [params, why] of cases) {
+    const r = await endSession(params);
+    assert.equal(r.status, 400, JSON.stringify(params));
+    assert.equal(r.location, null, JSON.stringify(params));
+    assert.match(r.text, /id="error"/);
+    assert.ok(r.text.includes(why), `${JSON.stringify(params)}: ${r.text}`);
+  }
+});
+
+test("end session: an expired hint and one signed by a retired key are accepted", async () => {
+  await ctl("/__mock/config", { cfg: { idTokenTtl: 0 } });
+  const hint = await idTokenFor();
+  await ctl("/__mock/rotate-key");
+  assert.ok(decode(hint).payload.exp <= Math.floor(Date.now() / 1000));
+  const r = await endSession({ id_token_hint: hint, post_logout_redirect_uri: SIGNED_OUT, state: "s" });
+  assert.equal(r.status, 302, r.text);
 });

@@ -47,7 +47,7 @@ badged them as a researcher, and which works they registered. See
 | Authorization endpoint | `https://www.nobleid.org/oauth/authorize` (a different host from the issuer) |
 | Flow | Authorization code + PKCE S256, `response_mode=query` |
 | ID tokens | ES256 only |
-| Logout | Revoke your tokens and clear your session; there is no end-session endpoint |
+| Logout | Revoke your tokens and clear your session; optionally end the NobleID session at `https://www.nobleid.org/oauth/logout` ([logout](docs/logout.md)) |
 
 ## What is in the kit
 

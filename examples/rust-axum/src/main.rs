@@ -347,7 +347,7 @@ async fn logout(State(app): State<Shared>, headers: HeaderMap, Form(f): Form<Has
     if !csrf_ok(&app, &sid, &headers, &f) {
         return page(StatusCode::FORBIDDEN, "<p id=\"error\">forbidden</p>", set);
     }
-    // NobleID has no end-session endpoint: revoke the tokens, then clear our session.
+    // Logout (local): revoke the tokens, then clear our session. Ending the NobleID session is optional (docs/logout.md).
     let tokens = app.sessions.lock().unwrap().remove(&sid).and_then(|s| s.tokens);
     if let Some(t) = tokens {
         if let Some(rt) = &t.refresh_token {

@@ -62,7 +62,7 @@ c.GenericOAuthenticator.admin_users = set(
 | `basic_auth` | leave `False` | Sends `client_secret_post`, which NobleID accepts. `True` switches to `client_secret_basic`, which NobleID also accepts. |
 | `username_claim` | `"sub"` | See below. |
 | `oauth_callback_url` | your hub's `/hub/oauth_callback` | Register exactly this with NobleID. |
-| `logout_redirect_url` | leave unset | NobleID has no end-session endpoint. JupyterHub logout is local. |
+| `logout_redirect_url` | leave unset | JupyterHub logout is then local. NobleID's end-session endpoint is optional; see [logout](../logout.md). |
 
 ### Redirect URI
 

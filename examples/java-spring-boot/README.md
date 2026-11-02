@@ -48,7 +48,7 @@ Most of the work is configuration. Each item below is in this example.
 | `CallbackIssuerFilter` before `OAuth2LoginAuthenticationFilter` | Spring Security does not check the RFC 9207 `iss` parameter. The filter checks, in order: a sign-in is in progress, `state` matches, `iss` equals the issuer (missing `iss` is rejected). Only then does Spring see `error` or the code. |
 | `OidcUserService.setRetrieveUserInfo(r -> true)` | Spring calls userinfo only for some scopes by default. `research_interests`, `affiliations` and `works_count` are only in userinfo. |
 | A failure handler that renders the error | The default redirects to `/login?error`, which here would start a new sign-in. |
-| No `end_session_endpoint`, no `OidcClientInitiatedLogoutSuccessHandler` | NobleID has no end-session endpoint. Logout is revocation plus a local session clear. |
+| No `OidcClientInitiatedLogoutSuccessHandler` | Logout is revocation plus a local session clear. Ending the NobleID session too is optional: [docs/logout.md](../../docs/logout.md). |
 
 Nonce, `state`, ID-token signature (JWKS, re-fetched on an unknown `kid`), `iss`,
 `aud` and `exp` checks are Spring's defaults; nothing to add.

@@ -376,7 +376,7 @@ class App < Sinatra::Base
     redirect "/", 303
   end
 
-  # NobleID has no end-session endpoint: revoke the tokens, then clear our session.
+  # Logout (local): revoke the tokens, then clear our session. Ending the NobleID session is optional (docs/logout.md).
   post "/logout" do
     tokens = session["tokens"]
     if tokens

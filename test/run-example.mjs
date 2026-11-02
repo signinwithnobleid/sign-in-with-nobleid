@@ -82,10 +82,17 @@ export async function runExample(ex, { setup = true, log = console.log } = {}) {
   }
   const cwd = path.join(ROOT, ex.cwd);
   const client = CLIENTS.find((c) => c.type === (ex.client || "confidential"));
-  const mock = createMock({ clients: CLIENTS });
-  const mockPort = await mock.listen(0);
   const port = ex.port || (await freePort());
   const appUrl = `http://localhost:${port}`;
+  // Examples that end the NobleID session register their sign-out return URL,
+  // which must match exactly (port included), as on the provider.
+  const signedOutUrl = appUrl + "/signed-out";
+  const endSession = !!(ex.profile && ex.profile.endSession);
+  const clients = endSession
+    ? CLIENTS.map((c) => (c.client_id === client.client_id ? { ...c, post_logout_redirect_uris: [...(c.post_logout_redirect_uris || []), signedOutUrl] } : c))
+    : CLIENTS;
+  const mock = createMock({ clients });
+  const mockPort = await mock.listen(0);
   const vars = { PORT: String(port), ISSUER: mock.issuer, APP_URL: appUrl, ROOT };
   const sub = (s) => String(s).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
   const env = {
@@ -96,6 +103,7 @@ export async function runExample(ex, { setup = true, log = console.log } = {}) {
     REDIRECT_URI: appUrl + (ex.callbackPath || "/callback"),
     PORT: String(port),
     APP_URL: appUrl,
+    ...(endSession ? { POST_LOGOUT_REDIRECT_URI: signedOutUrl } : {}),
     ...Object.fromEntries(Object.entries(ex.env || {}).map(([k, v]) => [k, sub(v)])),
   };
   log(`# ${ex.name}: mock ${mock.issuer}, app ${appUrl}`);

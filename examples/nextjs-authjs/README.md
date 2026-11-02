@@ -139,7 +139,8 @@ job holding a per-user lock) shortly before expiry.
 
 ## Sign-out
 
-NobleID has no end-session endpoint. `POST /logout` checks the origin and the
+This example signs out locally (NobleID's end-session endpoint is optional; see
+[docs/logout.md](../../docs/logout.md)). `POST /logout` checks the origin and the
 CSRF token and calls Auth.js `signOut()`. Its `events.signOut` revokes the
 refresh token (which also ends its access tokens) and the access token at the
 revocation endpoint (RFC 7009), then Auth.js clears the session cookie.

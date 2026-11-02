@@ -108,8 +108,9 @@ _ = client.Revoke(ctx, tokens.AccessToken, "access_token")
 // then clear your session
 ```
 
-NobleID has no end-session endpoint. Sign-out is revocation (RFC 7009, at the
-discovered `revocation_endpoint`) plus clearing your own session.
+Sign-out is revocation (RFC 7009, at the discovered `revocation_endpoint`)
+plus clearing your own session. To end the NobleID session too, send the
+browser to the discovered `end_session_endpoint`; see [logout](../../docs/logout.md).
 
 ### Your own HTTP client
 

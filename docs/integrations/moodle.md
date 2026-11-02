@@ -55,7 +55,7 @@ created at least:
 | `token_endpoint` | `https://id.nobleid.org/oauth/token` |
 | `userinfo_endpoint` | `https://id.nobleid.org/oauth/userinfo` |
 
-There is no `end_session_endpoint`, and none is needed.
+NobleID's `end_session_endpoint` is optional and not needed here; see [logout](../logout.md).
 
 ## 3. User field mappings
 

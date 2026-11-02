@@ -526,8 +526,8 @@ func (c *Client) doRefresh(ctx context.Context, refreshToken string) (*Tokens, s
 
 // Revoke revokes a token (RFC 7009) at the discovered revocation_endpoint.
 // hint is "refresh_token", "access_token" or "". Revoking a refresh token also
-// ends the access tokens issued from it. NobleID has no end-session endpoint:
-// sign-out is revoke plus clearing your own session.
+// ends the access tokens issued from it. Sign-out is revoke plus clearing your
+// own session; ending the NobleID session too is optional (docs/logout.md).
 func (c *Client) Revoke(ctx context.Context, token, hint string) error {
 	if c.revocationURL == "" {
 		return newErr("server_error", "the provider has no revocation_endpoint")

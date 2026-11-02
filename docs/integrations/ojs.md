@@ -73,8 +73,9 @@ Keycloak links that to NobleID's `sub`. Neither link changes if the user
 changes their email.
 
 Logout: the plugin sends the user to Keycloak's end-session endpoint, which
-ends the Keycloak session. NobleID has no end-session endpoint, so the user
-stays signed in at nobleid.org. That is expected.
+ends the Keycloak session. The user stays signed in at nobleid.org unless
+Keycloak is also set to use NobleID's end-session endpoint (see
+[Keycloak](keycloak.md#logout)). Either is fine.
 
 ## Route 2: connect directly (not yet released)
 
@@ -102,7 +103,7 @@ mock. When a release contains it, configure:
   endpoint on `www.nobleid.org`.
 - The plugin asks for `openid profile email`. It sends the client secret in
   the request body (`client_secret_post`), which NobleID accepts.
-- NobleID publishes no `end_session_endpoint`, so the plugin's logout is local.
+- The plugin's logout is local; NobleID's `end_session_endpoint` is optional ([logout](../logout.md)).
 
 ## Profile fields
 

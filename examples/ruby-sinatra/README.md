@@ -53,8 +53,9 @@ All in `app.rb`, on the `provider :nobleid` line:
 | `scope:` | An array; it is sent space-separated. Users may untick any scope except `openid`, so the app reads the granted `scope` from the token response. |
 | `request_path: "/login"`, `callback_path:` | OmniAuth reuses `request_path` as the callback path unless `callback_path` is set too. |
 
-There is no end-session endpoint. Do not configure one, and do not use the
-gem's `/logout` redirect; sign out by revoking tokens (below).
+This example signs out by revoking tokens (below), not with the gem's
+`/logout` redirect. NobleID's end-session endpoint is optional; see
+[docs/logout.md](../../docs/logout.md).
 
 ## What `nobleid_strategy.rb` adds
 

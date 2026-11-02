@@ -83,5 +83,28 @@ test("WordPress plugin request shape signs in against the mock", async () => {
   assert.ok(info.preferred_username);
   assert.ok(info.email);
   assert.equal(info.email_verified, true);
-  assert.ok(!("end_session_endpoint" in meta), "leave the plugin's End Session Endpoint URL empty");
+});
+
+test("WordPress sign-out return address carries the user's language, so End Session must stay empty", async () => {
+  // With End Session set, the plugin (get_end_session_logout_redirect_url)
+  // sends WordPress's logged-out address, to which wp-login.php adds the
+  // user's locale. Even with one variant registered, other languages fail.
+  const site = "http://localhost:8089";
+  const loggedOut = (lang) => `${site}/wp-login.php?loggedout=true&wp_lang=${lang}`;
+  const wpClient = { ...CONF, post_logout_redirect_uris: [loggedOut("en_US")] };
+  const wp = createMock({ clients: [wpClient] });
+  await wp.listen(0);
+  try {
+    const m = await (await fetch(wp.issuer + "/.well-known/openid-configuration")).json();
+    // The plugin's own URL shape: id_token_hint and post_logout_redirect_uri only.
+    const out = (lang) =>
+      fetch(`${m.end_session_endpoint}?client_id=${CONF.client_id}&post_logout_redirect_uri=${encodeURIComponent(loggedOut(lang))}`, { redirect: "manual" });
+    assert.equal((await out("en_US")).status, 302);
+    const de = await out("de_DE");
+    assert.equal(de.status, 400);
+    assert.equal(de.headers.get("location"), null);
+    assert.match(await de.text(), /return address is not registered/);
+  } finally {
+    await wp.close();
+  }
 });

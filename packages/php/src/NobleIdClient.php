@@ -417,8 +417,8 @@ final class NobleIdClient
 
     /**
      * Revoke a token (RFC 7009). Revoking a refresh token also ends the access
-     * tokens issued from it. NobleID has no end-session endpoint: to sign out,
-     * revoke, then clear your own session.
+     * tokens issued from it. To sign out, revoke, then clear your own session;
+     * ending the NobleID session too is optional (docs/logout.md).
      */
     public function revoke(#[\SensitiveParameter] string $token, ?string $tokenTypeHint = null): void
     {

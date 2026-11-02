@@ -16,6 +16,9 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || "http://localhost:3000/callback";
 const PORT = Number(process.env.PORT || 3000);
 const SCOPE = process.env.SCOPE || "openid profile email orcid affiliations works offline_access";
+// Optional: also end the NobleID session on sign-out (RP-Initiated Logout).
+// Register this exact URL as a sign-out return URL of your NobleID app.
+const POST_LOGOUT_REDIRECT_URI = process.env.POST_LOGOUT_REDIRECT_URI || "";
 
 if (!CLIENT_ID || !CLIENT_SECRET) {
   console.error("Set CLIENT_ID and CLIENT_SECRET (see .env.example).");
@@ -33,6 +36,14 @@ const nobleid = await createNobleIdClient({
 const APP_ORIGIN = new URL(REDIRECT_URI).origin;
 const CALLBACK_PATH = new URL(REDIRECT_URI).pathname;
 const SECURE_COOKIE = APP_ORIGIN.startsWith("https:");
+
+const END_SESSION = POST_LOGOUT_REDIRECT_URI ? nobleid.config.serverMetadata().end_session_endpoint : null;
+if (POST_LOGOUT_REDIRECT_URI && (!END_SESSION || new URL(POST_LOGOUT_REDIRECT_URI).origin !== APP_ORIGIN)) {
+  console.error("POST_LOGOUT_REDIRECT_URI must be on this app, and the provider must publish end_session_endpoint.");
+  process.exit(1);
+}
+const SIGNED_OUT_PATH = POST_LOGOUT_REDIRECT_URI ? new URL(POST_LOGOUT_REDIRECT_URI).pathname : null;
+const LOGOUT_COOKIE = "nobleid_logout";
 
 /* ── a tiny in-memory session store (use a real one in production) ── */
 // A session exists only from /login on; anonymous visits create nothing.
@@ -83,7 +94,8 @@ function send(res, status, html) {
   res.writeHead(status, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store",
-    "Content-Security-Policy": "default-src 'none'; img-src https:; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
+    // form-action also governs where a form's redirect may go: allow NobleID's sign-out page when used.
+    "Content-Security-Policy": `default-src 'none'; img-src https:; style-src 'unsafe-inline'; form-action 'self'${END_SESSION ? " " + new URL(END_SESSION).origin : ""}; frame-ancestors 'none'`,
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
   });
@@ -111,6 +123,14 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, APP_ORIGIN);
   const { sid, data: s } = getSession(req);
   try {
+    // Back from NobleID's sign-out page: check the state we sent.
+    if (SIGNED_OUT_PATH && req.method === "GET" && url.pathname === SIGNED_OUT_PATH) {
+      const m = new RegExp(`(?:^|;\\s*)${LOGOUT_COOKIE}=([A-Za-z0-9_-]{43})(?:;|$)`).exec(req.headers.cookie || "");
+      res.setHeader("Set-Cookie", `${LOGOUT_COOKIE}=; Path=${SIGNED_OUT_PATH}; HttpOnly; SameSite=Lax; Max-Age=0`);
+      if (!m || !safeEqual(url.searchParams.get("state") || "", m[1])) return send(res, 400, `<p id="error">invalid_state</p><p><a href="/">Home</a></p>`);
+      return send(res, 200, `<h1>Signed out</h1><p id="signed-out">You are signed out of this app and of NobleID.</p><p><a href="/">Home</a></p>`);
+    }
+
     if (req.method === "GET" && url.pathname === "/") {
       if (!s?.user) {
         return send(res, 200, `<h1>NobleID example (Node)</h1><p id="signed-out">You are signed out.</p><p><a href="/login">Sign in with NobleID</a></p>`);
@@ -171,12 +191,24 @@ const server = http.createServer(async (req, res) => {
         return redirect(res, "/");
       }
 
-      // Logout: NobleID has no end-session endpoint. Revoke, then clear our session.
+      // Logout: revoke, then clear our session. With POST_LOGOUT_REDIRECT_URI set,
+      // also end the NobleID session (docs/logout.md); NobleID asks the person first.
+      const idToken = s.tokens?.id_token;
       if (s.tokens) {
         if (s.tokens.refresh_token) await nobleid.revoke(s.tokens.refresh_token, "refresh_token").catch(() => {});
         await nobleid.revoke(s.tokens.access_token, "access_token").catch(() => {});
       }
       destroySession(sid, res);
+      if (END_SESSION && idToken) {
+        const state = randomId();
+        const to = new URL(END_SESSION);
+        to.search = new URLSearchParams({ id_token_hint: idToken, post_logout_redirect_uri: POST_LOGOUT_REDIRECT_URI, state }).toString();
+        res.setHeader("Set-Cookie", [
+          res.getHeader("Set-Cookie"),
+          `${LOGOUT_COOKIE}=${state}; Path=${SIGNED_OUT_PATH}; HttpOnly; SameSite=Lax; Max-Age=600${SECURE_COOKIE ? "; Secure" : ""}`,
+        ]);
+        return redirect(res, to.href);
+      }
       return redirect(res, "/");
     }
 

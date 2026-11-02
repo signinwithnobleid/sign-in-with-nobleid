@@ -36,5 +36,5 @@ omniauth_openid_connect 0.8.0:
 
 The subclass in `nobleid_strategy.rb` fixes each of these. Never enable
 `Rack::OAuth2.debug!` or `OpenIDConnect.debug!`: they log tokens. Logout:
-revoke at the discovered `revocation_endpoint`; do not use the gem's
-end-session redirect.
+revoke at the discovered `revocation_endpoint`. The end-session redirect is
+optional; see [logout](../logout.md).

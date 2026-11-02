@@ -321,7 +321,7 @@ app.MapPost("/logout", async (HttpContext ctx, IAntiforgery af, IHttpClientFacto
     var auth = await ctx.AuthenticateAsync(Cookie);
     if (auth.Succeeded)
     {
-        // NobleID has no end-session endpoint: revoke the tokens, then clear our cookie.
+        // Logout (local): revoke the tokens, then clear our cookie. Ending the NobleID session is optional (docs/logout.md).
         var config = await Config(oidc);
         if (config.RevocationEndpoint is { Length: > 0 } revocation)
         {
