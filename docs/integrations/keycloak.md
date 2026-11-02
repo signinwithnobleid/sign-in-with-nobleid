@@ -1,6 +1,6 @@
 # Keycloak (NobleID as an identity provider)
 
-Written for Keycloak 26.x (labels checked in 26.8). Keycloak brokers the
+Written for Keycloak 26.x (labels checked in 26.8.1). Keycloak brokers the
 sign-in: users choose NobleID on the Keycloak login page, and your applications
 keep talking to Keycloak. This is also the working route for platforms whose
 own OIDC client cannot handle NobleID (see [ojs.md](ojs.md)).
@@ -31,14 +31,17 @@ Discovery fills in the rest. Check the values:
 | Validate Signatures | On |
 | Use JWKS URL | On |
 | JWKS URL | `https://id.nobleid.org/.well-known/jwks.json` |
-| Use PKCE | On |
-| PKCE Method | `S256` |
 | Client authentication | `Client secret sent as HTTP Basic authentication` (`Client secret sent in the request body` also works) |
 | Client ID | `nbcl_your_client_id` |
 | Client Secret | `nbcs_your_client_secret` (or a vault reference) |
 
 Keycloak verifies NobleID's ES256 ID tokens with the JWKS URL. No algorithm
 setting is needed. It downloads keys again when NobleID rotates them.
+
+**Then turn on PKCE.** Discovery does not set it, and on the Add page the
+switch is read-only while discovery is on. Click **Add**, open the provider's
+settings, turn **Use PKCE** On, set **PKCE Method** to `S256` and save. The
+default method is `plain`, which NobleID refuses.
 
 **Advanced** section:
 
@@ -62,7 +65,7 @@ setting is needed. It downloads keys again when NobleID rotates them.
 | Account linking only | Off |
 | Hide on login page | Off, or On if apps send `kc_idp_hint=nobleid` |
 | Verify essential claim | Off. See "Only identity-verified users" below for an optional use. |
-| First login flow override | `first broker login` (default). See below. |
+| First login flow override | leave empty, so the realm's first broker login flow is used. See below. |
 | Sync mode | `Import`. Use `Force` if you want profile changes on NobleID to update Keycloak on every sign-in. |
 | Case-sensitive username | Off |
 
@@ -131,9 +134,8 @@ itself.
 
 To admit only NobleID users whose identity check passed, set **Verify
 essential claim** On, **Essential claim** `identity_verified`, **Essential
-claim value** `true`. This claim comes with the `profile` scope. Do not use
-`email_verified` here. Keycloak's essential-claim check does not see standard
-claims such as `email_verified`, so every sign-in would be refused.
+claim value** `true`. This claim comes with the `profile` scope. The check
+reads the claims in the ID token, where `identity_verified` is.
 
 ## Logout
 

@@ -12,7 +12,8 @@ use the admin-API route without the PKCE fields.
   authorization endpoint on `www.nobleid.org` itself.
 - It asks for `openid email profile`. The scope list is fixed in code.
 - It authenticates to the token endpoint with `client_secret_basic`. With PKCE
-  enabled it sends the S256 challenge as well. It sends a `nonce` and `state`.
+  enabled it sends the S256 challenge as well. It sends `state`, and a
+  `nonce` that is never checked, because it does not read the ID token.
 - It reads the user from the **userinfo** endpoint and does not validate the
   ID token. NobleID's ES256 signing therefore needs no setting.
 - The account is keyed on `sub`. `preferred_username`, `given_name`,
@@ -71,7 +72,8 @@ discovery document on load and disables the provider if it cannot.
 
 Register `<dataverse.siteUrl>/oauth2/callback.xhtml`. Its usual shape is
 `https://dataverse.example.org/oauth2/callback.xhtml`. It must match your
-`dataverse.siteUrl` exactly, including any port.
+`dataverse.siteUrl` exactly, including any port. If the `:OAuth2CallbackUrl`
+database setting is set, Dataverse uses that URL instead: register it.
 
 ## Notes
 

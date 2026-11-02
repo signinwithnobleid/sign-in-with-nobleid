@@ -1,7 +1,9 @@
 # DSpace
 
-Written for DSpace 8.x and 9.x. The OIDC plugin and its keys have not changed
-since DSpace 7.2, where they first appeared, so 7.2–7.6 should behave the same.
+Written for DSpace 8.x to 10.x (10.1, September 2026). The OIDC plugin and its
+keys have not changed since DSpace 7.2, where they first appeared, so 7.2 to
+7.6 should behave the same. DSpace 10 adds only
+`authentication-oidc.login.specialgroup`.
 
 **Tested?** Documented from the platform's documentation and source code; not run.
 
@@ -26,8 +28,15 @@ runs the sign-in with `state`, `nonce` and PKCE, and then presents a Keycloak
 realm to DSpace. It keeps unverified emails out only if you set **Trust Email
 On** on the NobleID identity provider **and** **Realm settings → Login →
 Verify email On** in the realm DSpace uses; without both, the email problem
-above comes back through Keycloak. DSpace's default OIDC settings
-are already written for a Keycloak realm.
+above comes back through Keycloak. DSpace's default endpoint settings build
+Keycloak's old `/auth/realms/...` path, which Keycloak 17 and later no longer
+serve. Set the three endpoints explicitly:
+
+```properties
+authentication-oidc.authorize-endpoint = https://sso.example.org/realms/<realm>/protocol/openid-connect/auth
+authentication-oidc.token-endpoint = https://sso.example.org/realms/<realm>/protocol/openid-connect/token
+authentication-oidc.user-info-endpoint = https://sso.example.org/realms/<realm>/protocol/openid-connect/userinfo
+```
 
 Connect DSpace to NobleID directly only where no existing EPerson matters,
 for example a test instance, or a repository that lets NobleID sign-ins

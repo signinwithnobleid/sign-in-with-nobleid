@@ -41,7 +41,7 @@ notes from NobleID's own testing.
 | **omniauth_openid_connect 0.8** (Ruby) | `client_signing_alg: :ES256`, `pkce: true`, `send_nonce: true`, `client_auth_method: :basic`, `send_scope_to_token_endpoint: false`, explicit `callback_path`. **Takes `nonce` and `code_verifier` from callback parameters**, does not check `iss`, surfaces `error` before `state`, does not compare the userinfo `sub`: use the example's strategy subclass. Never enable `OpenIDConnect.debug!` / `Rack::OAuth2.debug!` (they log tokens). |
 | **ASP.NET Core OpenIdConnect** (.NET 10) | `ResponseMode = Query` (default is `form_post`), `UsePkce = true`, `TokenValidationParameters.ValidAlgorithms = ["ES256"]`, `MapInboundClaims = false`. Uses PAR automatically on .NET 9+ when discovery lists it. Does not check `iss`. Userinfo-only claims are dropped by default claim actions. |
 | **Keycloak** (identity brokering) | PKCE S256 on, client secret sent as Basic, validate signatures with the JWKS URL, ES256. Declare `nobleid`, `orcid` and other attributes in the realm's user profile or Keycloak drops them. See [integrations/keycloak.md](integrations/keycloak.md). |
-| **WordPress OpenID Connect Generic Client** (3.11) | Set the Issuer and JWKS URI fields; leave End Session empty. See [integrations/wordpress.md](integrations/wordpress.md). |
+| **WordPress OpenID Connect Generic Client** (3.11.3 or later) | Set the Issuer and JWKS URI fields; leave End Session empty. See [integrations/wordpress.md](integrations/wordpress.md). |
 
 ## Testing locally
 

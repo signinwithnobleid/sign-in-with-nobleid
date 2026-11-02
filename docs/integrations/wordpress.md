@@ -1,9 +1,11 @@
 # WordPress
 
 Uses the **OpenID Connect Generic Client** plugin (slug
-`daggerhart-openid-connect-generic`). Written for plugin version **3.11.x**
-(3.11.3 checked). Older versions behave differently around ID token
-verification; update first.
+`daggerhart-openid-connect-generic`). Written for plugin version **3.11.3**
+or later. Versions 3.11.0 to 3.11.2 have no Issuer field: they take the
+issuer from the login endpoint's host (`https://www.nobleid.org`), so every
+NobleID sign-in fails. Older versions also check ID tokens differently.
+Update first.
 
 **Tested?** The plugin's exact request shape (its authorize URL format, a
 `client_secret_post` token request with its extra `scope` parameter, no PKCE,
@@ -51,19 +53,23 @@ value the plugin's settings page shows and register that.
 | Link Existing Users | off (see below) |
 | Create user if does not exist | your choice |
 
-**Set the Issuer field.** The login endpoint is on `www.nobleid.org`, but the
-issuer is `https://id.nobleid.org`. If the Issuer field is empty, the plugin
-derives the issuer from the login endpoint's host and every ID token fails
-validation.
+**Set the Issuer field** (or the `OIDC_ISSUER` constant). The login endpoint
+is on `www.nobleid.org`, but the issuer is `https://id.nobleid.org`. If the
+Issuer field is empty, the plugin derives the issuer from the login
+endpoint's host and every ID token fails validation.
 
-**Set the JWKS URI.** With a JWKS URI, the plugin (3.11.x) verifies the ID
-token signature, `aud` and `iss`. Without one it decodes the ID token without
-verifying it and logs a security warning. Do not run without it.
+**Set the JWKS URI.** The plugin always checks the ID token's `iss`, `aud`
+and `exp`. With a JWKS URI it also verifies the signature. Without one it
+does not check the signature and logs a security warning. Do not run without
+it.
 
 The plugin's discovery import also works with
 `https://id.nobleid.org/.well-known/openid-configuration`; check afterwards
 that the Issuer and JWKS fields are filled and the end-session field is
 empty.
+
+The import fills the fields on the page only. Press **Save Changes** to keep
+them.
 
 To keep the secret out of the database, define it in `wp-config.php`:
 
@@ -94,8 +100,8 @@ existing username.
   `state`.
 - It sends an extra `scope` parameter on the token request. NobleID ignores
   `scope` on the code exchange, as the local mock does.
-- It does not check the `iss` response parameter (RFC 9207). The ID token's
-  `iss` is checked when the Issuer and JWKS fields are set.
+- It does not check the `iss` response parameter (RFC 9207). It checks the ID
+  token's `iss` against the Issuer field.
 - Logout signs the person out of WordPress only. NobleID has no end-session
   endpoint and the plugin does not revoke the token; access tokens expire
   after 15 minutes.
